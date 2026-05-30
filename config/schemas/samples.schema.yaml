@@ -1,0 +1,14 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+description: "Per-row schema for the samplesheet (validated row-wise by snakemake.utils.validate)."
+type: object
+required: [sample_id, dataset, condition, fibrosis_axis, modality, donor_id, data_path]
+properties:
+  sample_id: {type: string, description: "unique sample identifier (e.g. GSM…)"}
+  dataset: {type: string, description: "dataset key matching config.datasets (e.g. gse136103)"}
+  condition: {type: string, description: "harmonized condition label (healthy|cirrhotic|normal|MASL|MASH…)"}
+  fibrosis_stage_raw: {type: [string, "null"], description: "original label as published"}
+  fibrosis_axis: {type: integer, minimum: 0, maximum: 4, description: "harmonized ordinal stage 0-4"}
+  sort_gate: {type: [string, "null"], description: "FACS gate (e.g. CD45pos|CD45neg|total)"}
+  modality: {enum: [scRNA, snRNA]}
+  donor_id: {type: string, description: "biological donor (replication unit for DE)"}
+  data_path: {type: string, description: "path to the 10x triplet dir or .h5ad for this sample"}

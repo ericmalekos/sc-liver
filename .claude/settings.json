@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(squeue)",
+      "Bash(squeue *)",
+      "Bash(sacct *)",
+      "Bash(sinfo)",
+      "Bash(sinfo *)",
+      "Bash(scontrol show *)",
+      "Bash(nvidia-smi)",
+      "Bash(nvidia-smi *)",
+      "Bash(conda env list)"
+    ]
+  }
+}

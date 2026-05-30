@@ -1,0 +1,17 @@
+name: sc-qc-py
+channels: [conda-forge, bioconda, nodefaults]
+dependencies:
+  - python=3.11
+  - scanpy=1.10.*
+  - anndata>=0.10
+  - zarr
+  - leidenalg
+  - scikit-learn=1.4.*
+  - matplotlib-base=3.8.*
+  - seaborn=0.13.*
+  - pandas=2.2.*
+  - numpy=1.26.*
+  - pyyaml
+  - pip
+  - pip:
+      - scrublet==0.2.3

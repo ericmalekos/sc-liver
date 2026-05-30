@@ -1,0 +1,14 @@
+name: sc-ccc-r
+channels: [conda-forge, bioconda, nodefaults]
+# Downstream-target corroboration of ligand-receptor predictions (NicheNet).
+# nichenetr is GitHub-only; it is installed via remotes the first time the rule
+# runs (see workflow/scripts/R/nichenet_corroborate.R), keyed to a pinned commit.
+dependencies:
+  - r-base=4.3.*
+  - r-devtools
+  - r-remotes
+  - r-tidyverse
+  - r-matrix
+  - r-jsonlite
+  - r-optparse
+  - bioconductor-limma

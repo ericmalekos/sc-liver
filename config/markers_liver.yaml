@@ -1,0 +1,46 @@
+# Machine-readable marker sets — the curated companion to
+# docs/reference_liver_cell_types_fibrosis.md. Used for marker-based annotation,
+# decoupler over-representation, and compartment validation. Combine markers
+# (a cluster should express SEVERAL markers of a type). Symbols are human (HGNC).
+
+# Broad cell-type markers (for Leiden cluster labelling + CellTypist cross-check)
+cell_types:
+  Hepatocyte:        [ALB, APOA1, APOB, TTR, TF, SERPINA1, HP, CYP2E1, CYP3A4, ASGR1, HNF4A]
+  Cholangiocyte:     [KRT19, KRT7, EPCAM, SOX9, CFTR, ANXA4, FXYD2]
+  LSEC:              [CLEC4G, CLEC4M, STAB1, STAB2, FCGR2B, OIT3, CLEC1B, LYVE1]
+  Endothelial_vasc:  [PECAM1, VWF, CD34, CLDN5, PLVAP, RAMP2, AQP1]
+  HSC_mesenchyme:    [PDGFRB, DCN, RGS5, DES, LRAT, RBP1, COLEC11, HGF, RELN, ANGPTL6]
+  Portal_fibroblast: [PDGFRA, THY1, ELN, FBLN1, MSLN, SLIT2, GPC3]
+  Kupffer_resident:  [CD68, CD163, MARCO, VSIG4, CD5L, TIMD4, C1QA, SLC40A1]
+  Monocyte_MoMac:    [CD14, LYZ, S100A8, S100A9, FCN1, VCAN, CCR2, FCGR3A]
+  DC:                [CLEC9A, XCR1, CD1C, FCER1A, LILRA4, GZMB, IL3RA]
+  T_NK:              [CD3D, CD3E, CD8A, CD4, IL7R, NKG7, GNLY, KLRD1, CD7]
+  B_plasma:          [CD79A, CD79B, MS4A1, IGHM, MZB1, IGHG1, XBP1, JCHAIN]
+  Mast:              [TPSAB1, TPSB2, CPA3, KIT, MS4A2]
+  Cycling:           [MKI67, TOP2A, STMN1, PCNA]
+
+# Mapping of fine cell types to the three REQUIRED disease compartments (+ others).
+# Used to roll clusters up into compartments for pseudobulk DE and scoring.
+compartments:
+  stellate_myofibroblast: [HSC_mesenchyme, Portal_fibroblast]
+  macrophage_monocyte:    [Kupffer_resident, Monocyte_MoMac]
+  endothelial:            [LSEC, Endothelial_vasc]
+  hepatocyte:             [Hepatocyte]
+  cholangiocyte:          [Cholangiocyte]
+  lymphoid:               [T_NK, B_plasma]
+  myeloid_other:          [DC, Mast]
+
+# Fibrosis-associated cell-STATE signatures (the validation targets). Recovery of
+# these in cirrhotic / F3-F4 samples is a pipeline quality gate.
+disease_states:
+  scar_associated_macrophage: [TREM2, CD9, SPP1, GPNMB, FABP5, CD63, LGALS3, ACP5, LPL]
+  scar_associated_endothelium: [ACKR1, PLVAP, VWA1, CD34, VCAM1, ICAM1]
+  activated_HSC_myofibroblast: [ACTA2, TAGLN, COL1A1, COL1A2, COL3A1, TIMP1, TNC, LOX, LOXL2, POSTN, SPARC, CCN2]
+  quiescent_HSC:               [LRAT, RBP1, RGS5, DES, GFAP, ANGPTL6, HGF]
+
+# Discriminators for the Q4 stromal-cluster disambiguation
+stromal_discriminators:
+  activated_HSC:     [RGS5, DES, LRAT, RBP1, NGFR, PDGFRB]
+  portal_fibroblast: [THY1, CD34, ELN, FBLN1, MSLN, SLIT2, GPC3, PDGFRA]
+  myofibroblast:     [ACTA2, TAGLN, COL1A1, TIMP1, TNC, POSTN]
+  vascular_smc:      [ACTA2, MYH11, NOTCH3, PLN]

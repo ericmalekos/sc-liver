@@ -1,0 +1,15 @@
+name: sc-qc-decontx
+channels: [conda-forge, bioconda, nodefaults]
+# decontX ambient-RNA removal WITHOUT the zellkonverter->basilisk bridge: Python handles
+# the .h5ad I/O and hands counts to R as a MatrixMarket file (see qc_ambient_decontx.py +
+# decontx_run.R). Light env, builds fast, runs at scale.
+dependencies:
+  - python=3.11
+  - anndata>=0.10
+  - zarr
+  - scipy=1.13.*
+  - pandas=2.2.*
+  - numpy=1.26.*
+  - r-base=4.3.*
+  - bioconductor-decontx=1.0.*
+  - r-matrix

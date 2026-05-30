@@ -1,0 +1,93 @@
+# =============================================================================
+# SELF-CONTAINED test config (Snakemake --configfile replaces config wholesale).
+# Runs the ENTIRE DAG on the tiny committed fixture (test/data) in minutes,
+# CPU-only, no network. Used by CI and local development.
+# =============================================================================
+
+project: {name: sc-liver-fibrosis-test, seed: 0}
+seeds: {global: 0, numpy: 0, torch: 0, leiden: 0, ml: 0}
+gpu: {enabled: false, partition: gpu, gres: "gpu:1"}
+
+samples_tsv: test/samples.test.tsv
+
+datasets:
+  gse136103: {role: primary, geo_accession: GSE136103, supp_url: "file://test/data", md5: null, modality: scRNA, chemistry: 10x_3p_v2, organism: human, datashare_rds: null}
+  gse244832: {role: validation, geo_accession: GSE244832, supp_url: "file://test/data", md5: null, modality: snRNA, organism: human, etiology: MASLD_MASH}
+
+metadata:
+  schema: cellxgene
+  nomenclature: rinella2023
+  fibrosis_mapping: {healthy: 0, normal: 0, non_cirrhotic: 1, F0: 0, F1: 1, F2: 2, F3: 3, F4: 4, cirrhotic: 4, MASL: 1, MASH_F2: 2, MASH_F3: 3, MASH_F4: 4}
+  f2plus_threshold: 2
+
+qc:
+  ambient: {method: none}        # skip ambient on synthetic fixture (no empty droplets)
+  doublets: {method: scrublet, expected_rate: 0.06}
+  n_mads: 5                       # permissive on tiny data
+  mito_pct_max: {scRNA: 20.0, snRNA: 20.0}
+  min_genes: 50
+  min_counts: 100
+  min_cells: 1
+  keep_stressed: true
+
+integration:
+  method: harmony
+  batch_key: sample_id
+  n_hvg: 500
+  n_latent: 20
+  n_neighbors: 10
+  scib_check: true
+  fibrosis_signal_guard: false    # fixture is synthetic; don't hard-fail the guard
+
+annotation:
+  leiden_resolution: 1.0
+  celltypist_model: null          # marker-based only on the fixture (no model download)
+  decoupler_ora_min_overlap: 2
+  markers_file: config/markers_liver.yaml
+
+de:
+  engine: deseq2
+  aggregate: sum
+  min_cells_per_donor: 5
+  min_donors_per_group: 2
+  design: "~ condition"
+  covariates: []
+  padj_threshold: 0.1
+  lfc_threshold: 0.0
+  contrasts:
+    gse136103: {name: cirrhotic_vs_healthy, group: condition, ref: healthy, test: cirrhotic}
+    gse244832: {name: F2plus_vs_low, group: fibrosis_bin, ref: low, test: high}
+
+pathway:
+  progeny_top: 100
+  collectri: false
+  gsea_sets: [fibrosis_core]
+  genesets_dir: config/genesets
+  score_method: aucell
+
+ccc:
+  method: liana_consensus
+  resource: consensus
+  expr_prop: 0.05
+  min_cells: 3
+  specificity_cutoff: 0.1
+  differential: true
+  nichenet_corroborate: false     # skip GitHub nichenetr install in CI
+  min_downstream_targets: 2
+
+crossdataset: {enabled: true, match_on: compartment, rank_metric: stat, min_concordance: 0.0}
+
+score:
+  weights: {de: 0.25, specificity: 0.20, reproducibility: 0.20, druggability: 0.15, accessibility: 0.10, ml_shap: 0.10}
+  specificity_index: tau
+  druggability_sources: [open_targets, dgidb]
+  druggability_cache: resources/druggability_snapshot.tsv
+  accessibility: {surfaceome: resources/surfaceome.csv, secretome: resources/secretome.csv}
+  top_n_per_compartment: 3
+  top_n_overall: 10
+  tie_breaker: [reproducibility, de]
+  required_compartments: [stellate_myofibroblast, macrophage_monocyte, endothelial]
+
+ml: {model: xgboost, input_level: pseudobulk, cv_folds: 2, group_key: donor_id, shap: true}
+
+report: {formats: [html], title: "FIXTURE — Cell-Type-Specific Biomarkers in Liver Fibrosis"}

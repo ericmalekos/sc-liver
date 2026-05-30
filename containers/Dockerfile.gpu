@@ -1,0 +1,22 @@
+# GPU runtime — only needed when config.gpu.enabled selects scVI/scANVI or CellBender.
+# Pre-bakes the two GPU envs so A100/A5500 nodes don't rebuild them per job.
+FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        wget git ca-certificates bzip2 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Miniforge (conda)
+RUN wget -q https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -O /tmp/mf.sh && \
+    bash /tmp/mf.sh -b -p /opt/conda && rm /tmp/mf.sh
+ENV PATH=/opt/conda/bin:$PATH
+
+COPY envs/integrate_gpu.yaml /tmp/integrate_gpu.yaml
+COPY envs/cellbender.yaml   /tmp/cellbender.yaml
+RUN conda env create -f /tmp/integrate_gpu.yaml && \
+    conda env create -f /tmp/cellbender.yaml && \
+    conda clean -afy
+
+WORKDIR /work
+ENTRYPOINT ["/bin/bash", "-lc"]

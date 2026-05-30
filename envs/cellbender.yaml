@@ -1,0 +1,11 @@
+name: sc-cellbender
+channels: [conda-forge, bioconda, nodefaults]
+# GPU-optional ambient-RNA removal. Selected only when config.gpu.enabled and
+# config.qc.ambient.method == cellbender. CPU also works but is slow.
+dependencies:
+  - python=3.10
+  - pytorch>=2.0           # CUDA build pulled automatically on GPU nodes
+  - pytables
+  - pip
+  - pip:
+      - cellbender==0.3.0

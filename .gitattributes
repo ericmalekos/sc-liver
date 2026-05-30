@@ -1,0 +1,8 @@
+# Keep line endings sane across platforms
+* text=auto eol=lf
+
+# Treat small committed fixture binaries as binary (and optionally track via git-lfs)
+test/data/** binary
+*.h5ad binary
+*.png binary
+*.pdf binary

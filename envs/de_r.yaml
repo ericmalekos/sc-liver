@@ -1,0 +1,14 @@
+name: sc-de-r
+channels: [conda-forge, bioconda, nodefaults]
+# Donor-aware pseudobulk differential expression (the scientific crux).
+dependencies:
+  - r-base=4.3.*
+  - bioconductor-deseq2=1.42.*
+  - bioconductor-edger=4.0.*
+  - bioconductor-limma=3.58.*
+  - bioconductor-muscat=1.16.*      # optional engine (de.engine: muscat)
+  - bioconductor-apeglm             # lfcShrink
+  - r-matrix
+  - r-data.table
+  - r-jsonlite
+  - r-optparse

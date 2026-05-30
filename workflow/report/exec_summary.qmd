@@ -1,0 +1,58 @@
+---
+title: "Executive Summary — Cell-Type-Specific Biomarkers in Human Liver Fibrosis"
+date: today
+params:
+  results_dir: "results"
+execute:
+  echo: false
+  warning: false
+---
+
+```{python}
+# | tags: [parameters]
+results_dir = "results"
+```
+
+```{python}
+from pathlib import Path
+import pandas as pd
+
+RD = Path(results_dir)
+scores = (
+    pd.read_csv(RD / "08_score/candidate_scores.tsv", sep="\t")
+    if (RD / "08_score/candidate_scores.tsv").exists()
+    else pd.DataFrame()
+)
+```
+
+## Objective
+
+Discover and prioritize **cell-type-specific biomarkers and therapeutic targets** in human
+liver fibrosis from single-cell transcriptomics (primary: GSE136103, cirrhotic vs healthy;
+validation: GSE244832, MASLD/MASH F0–F4), focusing on the hepatic stellate/myofibroblast,
+macrophage/monocyte, and endothelial compartments.
+
+## Approach (one paragraph)
+
+A reproducible Snakemake + Scanpy pipeline ingests and QCs the data, integrates over donor
+(not disease) and verifies fibrosis signal is preserved, annotates and validates the three
+disease compartments, runs **donor-aware pseudobulk** differential expression, characterizes
+mechanism via pathway/TF activity and ligand–receptor analysis (with downstream-target
+corroboration), and prioritizes candidates with a transparent composite score combining DE
+effect, cell-type specificity, cross-dataset reproducibility, druggability, biomarker
+accessibility, and an explainable ML (XGBoost + SHAP) signal.
+
+## Top candidates
+
+```{python}
+if not scores.empty:
+    cols = [c for c in ["rank", "gene", "compartment", "composite", "direction"] if c in scores.columns]
+    display(scores.sort_values("rank").head(20)[cols] if cols else scores.head(20))
+```
+
+## Translational interpretation
+
+The ranked table flags, per compartment, which candidates are most relevant for **diagnostics**
+(secreted/accessible, reproducible across datasets) versus **therapeutic targeting** (druggable,
+mechanistically central in the fibrotic crosstalk). See the full report and
+`results/08_score/candidate_scores.tsv` for the per-candidate rationale.

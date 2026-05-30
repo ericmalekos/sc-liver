@@ -1,0 +1,17 @@
+name: sc-integrate-cpu
+channels: [conda-forge, bioconda, nodefaults]
+dependencies:
+  - python=3.11
+  - scanpy=1.10.*
+  - anndata>=0.10
+  - zarr
+  - harmonypy=0.0.10
+  - leidenalg
+  - scikit-learn=1.4.*
+  - matplotlib-base=3.8.*
+  - pandas=2.2.*
+  - numpy=1.26.*
+  - pip
+  - pip:
+      - scib==1.1.5
+      - scib-metrics==0.5.1

@@ -1,0 +1,16 @@
+name: sc-ingest
+channels: [conda-forge, bioconda, nodefaults]
+dependencies:
+  - python=3.11
+  - scanpy=1.10.*
+  - anndata>=0.10
+  - zarr
+  - scipy=1.13.*
+  - pandas=2.2.*
+  - numpy=1.26.*
+  - h5py
+  - pyyaml
+  - requests
+  - pip
+  - pip:
+      - GEOparse==2.0.4

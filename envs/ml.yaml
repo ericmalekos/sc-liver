@@ -1,0 +1,16 @@
+name: sc-ml
+channels: [conda-forge, bioconda, nodefaults]
+dependencies:
+  - python=3.11
+  - scikit-learn=1.4.*
+  - xgboost=2.0.*
+  - shap=0.45.*
+  - pandas=2.2.*
+  - numpy=1.26.*
+  - scipy=1.13.*
+  - matplotlib-base=3.8.*
+  - seaborn=0.13.*
+  - anndata>=0.10
+  - zarr
+  - requests
+  - pyyaml

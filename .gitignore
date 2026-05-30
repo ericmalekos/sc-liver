@@ -1,0 +1,42 @@
+# ---- pipeline outputs & data (large / regenerated) ----
+results/
+data/
+.snakemake/
+.cache/
+.tmp/
+logs/
+*.h5ad
+*.rds
+*.loom
+*.sif
+*.tar
+*.mtx
+*.mtx.gz
+
+# ...but DO keep the small committed test fixture
+!test/data/
+!test/data/**
+
+# ---- conda / containers ----
+.conda/
+envs/.created/
+*.conda-lock
+
+# ---- python ----
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# ---- R ----
+.Rhistory
+.RData
+.Rproj.user/
+
+# ---- editors / OS ----
+.vscode/
+.idea/
+.DS_Store
+*.swp

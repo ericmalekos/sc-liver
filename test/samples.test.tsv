@@ -1,0 +1,9 @@
+sample_id	dataset	condition	fibrosis_stage_raw	fibrosis_axis	sort_gate	modality	donor_id	data_path
+GSM_H1	gse136103	healthy	healthy	0	total	scRNA	H1	test/data/GSM_H1
+GSM_H2	gse136103	healthy	healthy	0	total	scRNA	H2	test/data/GSM_H2
+GSM_C1	gse136103	cirrhotic	cirrhotic	4	total	scRNA	C1	test/data/GSM_C1
+GSM_C2	gse136103	cirrhotic	cirrhotic	4	total	scRNA	C2	test/data/GSM_C2
+GSM_N1	gse244832	normal	F0	0	total	snRNA	N1	test/data/GSM_N1
+GSM_N2	gse244832	MASL	F1	1	total	snRNA	N2	test/data/GSM_N2
+GSM_M1	gse244832	MASH	F3	3	total	snRNA	M1	test/data/GSM_M1
+GSM_M2	gse244832	MASH	F4	4	total	snRNA	M2	test/data/GSM_M2

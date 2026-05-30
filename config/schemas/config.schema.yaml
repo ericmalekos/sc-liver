@@ -1,0 +1,94 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+description: "Schema for the liver-fibrosis pipeline config."
+type: object
+required: [project, seeds, gpu, samples_tsv, datasets, metadata, qc, integration, annotation, de, pathway, ccc, crossdataset, score, ml, report]
+additionalProperties: true
+properties:
+  project:
+    type: object
+    required: [name, seed]
+    properties:
+      name: {type: string}
+      seed: {type: integer}
+  seeds: {type: object}
+  gpu:
+    type: object
+    required: [enabled]
+    properties:
+      enabled: {type: boolean}
+  samples_tsv: {type: string}
+  datasets:
+    type: object
+    minProperties: 1
+    additionalProperties:
+      type: object
+      required: [role, geo_accession, modality, organism]
+      properties:
+        role: {enum: [primary, validation]}
+        modality: {enum: [scRNA, snRNA]}
+        organism: {type: string}
+  metadata:
+    type: object
+    required: [fibrosis_mapping, f2plus_threshold]
+    properties:
+      fibrosis_mapping: {type: object}
+      f2plus_threshold: {type: integer}
+  qc:
+    type: object
+    required: [ambient, doublets, n_mads, mito_pct_max, min_genes, keep_stressed]
+    properties:
+      ambient:
+        type: object
+        properties: {method: {enum: [decontx, soupx, cellbender, none]}}
+      doublets:
+        type: object
+        properties: {method: {enum: [scrublet, scdblfinder, none]}}
+      n_mads: {type: number}
+      keep_stressed: {type: boolean}
+  integration:
+    type: object
+    required: [method, batch_key, n_hvg]
+    properties:
+      method: {enum: [harmony, scvi, scanvi]}
+      batch_key: {type: string}
+      n_hvg: {type: integer}
+  annotation:
+    type: object
+    required: [leiden_resolution, markers_file]
+  de:
+    type: object
+    required: [engine, aggregate, min_cells_per_donor, contrasts]
+    properties:
+      engine: {enum: [deseq2, edger, muscat]}
+      aggregate: {enum: [sum, mean]}
+      min_cells_per_donor: {type: integer}
+  pathway:
+    type: object
+    required: [score_method]
+    properties:
+      score_method: {enum: [aucell, ucell]}
+  ccc:
+    type: object
+    required: [method, expr_prop]
+  crossdataset:
+    type: object
+    required: [enabled]
+  score:
+    type: object
+    required: [weights, specificity_index, top_n_overall, required_compartments]
+    properties:
+      weights:
+        type: object
+        required: [de, specificity, reproducibility, druggability, accessibility, ml_shap]
+      specificity_index: {enum: [tau, gini]}
+      top_n_overall: {type: integer}
+      required_compartments: {type: array, items: {type: string}}
+  ml:
+    type: object
+    required: [model, input_level, group_key]
+    properties:
+      model: {enum: [xgboost, random_forest]}
+      input_level: {enum: [pseudobulk, percell]}
+  report:
+    type: object
+    required: [formats]

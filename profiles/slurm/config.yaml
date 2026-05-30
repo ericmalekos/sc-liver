@@ -1,0 +1,77 @@
+# Snakemake 7.x SLURM profile (generic cluster submission — compatible with the
+# cluster's slurm-wlm 21.08.5). Usage:
+#   snakemake --configfile config/config.yaml --profile profiles/slurm --use-conda
+#
+# Per-rule resources are set via `set-resources` / `set-threads` below so the rule
+# files stay scheduler-agnostic. `runtime` is in MINUTES; `mem_mb` in MB.
+# Partitions on this cluster: short (<=1h), medium (<=12h), long (<=14d), gpu (A100/A5500).
+
+cluster: >-
+  mkdir -p logs/slurm/{rule} &&
+  sbatch
+  --partition={resources.slurm_partition}
+  --cpus-per-task={threads}
+  --mem={resources.mem_mb}
+  --time={resources.runtime}
+  --job-name=smk.{rule}
+  --output=logs/slurm/{rule}/{rule}.%j.out
+  --error=logs/slurm/{rule}/{rule}.%j.err
+  {resources.slurm_extra}
+  --parsable
+cluster-status: profiles/slurm/status-sacct.sh
+cluster-cancel: scancel
+
+jobs: 100
+restart-times: 2
+max-jobs-per-second: 5
+max-status-checks-per-second: 5
+latency-wait: 90
+keep-going: true
+rerun-incomplete: true
+printshellcmds: true
+
+use-conda: true
+conda-frontend: conda
+use-singularity: false          # flip to true to run rules inside Singularity .sif
+singularity-args: "--bind /private/groups"
+
+# Default resources every job inherits unless overridden in set-resources.
+default-resources:
+  - mem_mb=8000
+  - runtime=60
+  - slurm_partition="short"
+  - slurm_extra=""
+
+# Per-rule overrides (heavy stages get more memory / longer partitions; GPU stages
+# only request a GPU when config.gpu.enabled flips them to the gpu env/partition).
+set-threads:
+  - integrate=16
+  - cluster_annotate=16
+  - ccc_liana=16
+  - ml_classifier_shap=16
+
+set-resources:
+  - download_geo:runtime=120
+  - integrate:mem_mb=128000
+  - integrate:runtime=480
+  - integrate:slurm_partition="medium"
+  - scib_benchmark:mem_mb=64000
+  - scib_benchmark:runtime=240
+  - scib_benchmark:slurm_partition="medium"
+  - cluster_annotate:mem_mb=96000
+  - cluster_annotate:runtime=360
+  - cluster_annotate:slurm_partition="medium"
+  - celltypist_decoupler_annotate:mem_mb=64000
+  - celltypist_decoupler_annotate:runtime=240
+  - celltypist_decoupler_annotate:slurm_partition="medium"
+  - deseq2_de:mem_mb=32000
+  - deseq2_de:runtime=180
+  - deseq2_de:slurm_partition="medium"
+  - ccc_liana:mem_mb=96000
+  - ccc_liana:runtime=360
+  - ccc_liana:slurm_partition="medium"
+  - ml_classifier_shap:mem_mb=48000
+  - ml_classifier_shap:runtime=240
+  - ml_classifier_shap:slurm_partition="medium"
+  - render_report:mem_mb=32000
+  - render_report:runtime=120

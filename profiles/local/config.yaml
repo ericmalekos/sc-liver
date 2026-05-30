@@ -1,0 +1,16 @@
+# Local profile — runs the whole pipeline on a single node (e.g. the 32-core head
+# node) using conda envs. Intended for the test fixture and development.
+#   snakemake --configfile config/config.test.yaml --profile profiles/local --use-conda
+cores: 8
+jobs: 8
+use-conda: true
+conda-frontend: conda
+rerun-incomplete: true
+keep-going: true
+printshellcmds: true
+latency-wait: 30
+default-resources:
+  - mem_mb=8000
+  - runtime=60
+  - slurm_partition="local"
+  - slurm_extra=""

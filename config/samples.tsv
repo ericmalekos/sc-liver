@@ -1,0 +1,39 @@
+sample_id	dataset	condition	fibrosis_stage_raw	fibrosis_axis	sort_gate	modality	donor_id	data_path
+GSM4041150	gse136103	healthy	Healthy1_Cd45+ disease status: healthy population: Leucocytes cause of liver dis	0	CD45pos	scRNA	Healthy1	results/00_download/gse136103/raw/GSM4041150
+GSM4041151	gse136103	healthy	Healthy1_Cd45-A disease status: healthy population: Other NPC cause of liver dis	0	CD45neg	scRNA	Healthy1	results/00_download/gse136103/raw/GSM4041151
+GSM4041152	gse136103	healthy	Healthy1_Cd45-B disease status: healthy population: Other NPC cause of liver dis	0	CD45neg	scRNA	Healthy1	results/00_download/gse136103/raw/GSM4041152
+GSM4041153	gse136103	healthy	Healthy2_Cd45+ disease status: healthy population: Leucocytes cause of liver dis	0	CD45pos	scRNA	Healthy2	results/00_download/gse136103/raw/GSM4041153
+GSM4041154	gse136103	healthy	Healthy2_Cd45- disease status: healthy population: Other NPC cause of liver dise	0	CD45neg	scRNA	Healthy2	results/00_download/gse136103/raw/GSM4041154
+GSM4041155	gse136103	healthy	Healthy3_Cd45+ disease status: healthy population: Leucocytes cause of liver dis	0	CD45pos	scRNA	Healthy3	results/00_download/gse136103/raw/GSM4041155
+GSM4041156	gse136103	healthy	Healthy3_Cd45-A disease status: healthy population: Other NPC cause of liver dis	0	CD45neg	scRNA	Healthy3	results/00_download/gse136103/raw/GSM4041156
+GSM4041157	gse136103	healthy	Healthy3_Cd45-B disease status: healthy population: Other NPC cause of liver dis	0	CD45neg	scRNA	Healthy3	results/00_download/gse136103/raw/GSM4041157
+GSM4041158	gse136103	healthy	Healthy4_Cd45+ disease status: healthy population: Leucocytes cause of liver dis	0	CD45pos	scRNA	Healthy4	results/00_download/gse136103/raw/GSM4041158
+GSM4041159	gse136103	healthy	Healthy4_Cd45- disease status: healthy population: Other NPC cause of liver dise	0	CD45neg	scRNA	Healthy4	results/00_download/gse136103/raw/GSM4041159
+GSM4041160	gse136103	healthy	Healthy5_Cd45+ disease status: healthy population: Leucocytes cause of liver dis	0	CD45pos	scRNA	Healthy5	results/00_download/gse136103/raw/GSM4041160
+GSM4041161	gse136103	cirrhotic	Cirrhotic1_Cd45+ disease status: fibrotic population: Leucocytes cause of liver 	4	CD45pos	scRNA	Cirrhotic1	results/00_download/gse136103/raw/GSM4041161
+GSM4041162	gse136103	cirrhotic	Cirrhotic1_Cd45-A disease status: fibrotic population: Other NPC cause of liver 	4	CD45neg	scRNA	Cirrhotic1	results/00_download/gse136103/raw/GSM4041162
+GSM4041163	gse136103	cirrhotic	Cirrhotic1_Cd45-B disease status: fibrotic population: Other NPC cause of liver 	4	CD45neg	scRNA	Cirrhotic1	results/00_download/gse136103/raw/GSM4041163
+GSM4041164	gse136103	cirrhotic	Cirrhotic2_Cd45+ disease status: fibrotic population: Leucocytes cause of liver 	4	CD45pos	scRNA	Cirrhotic2	results/00_download/gse136103/raw/GSM4041164
+GSM4041165	gse136103	cirrhotic	Cirrhotic2_CD45- disease status: fibrotic population: Other NPC cause of liver d	4	CD45neg	scRNA	Cirrhotic2	results/00_download/gse136103/raw/GSM4041165
+GSM4041166	gse136103	cirrhotic	Cirrhotic3_CD45+ disease status: fibrotic population: Leucocytes cause of liver 	4	CD45pos	scRNA	Cirrhotic3	results/00_download/gse136103/raw/GSM4041166
+GSM4041167	gse136103	cirrhotic	Cirrhotic3_Cd45- disease status: fibrotic population: Other NPC cause of liver d	4	CD45neg	scRNA	Cirrhotic3	results/00_download/gse136103/raw/GSM4041167
+GSM4041168	gse136103	cirrhotic	Cirrhotic4_Cd45+ disease status: fibrotic population: Leucocytes cause of liver 	4	CD45pos	scRNA	Cirrhotic4	results/00_download/gse136103/raw/GSM4041168
+GSM4041169	gse136103	cirrhotic	Cirrhotic5_Cd45+ disease status: fibrotic population: Leucocytes cause of liver 	4	CD45pos	scRNA	Cirrhotic5	results/00_download/gse136103/raw/GSM4041169
+JB288	gse244832	normal	NORMAL	0	total	snRNA	JB288	results/00_download/gse244832/raw/JB288
+JB289	gse244832	MASL	NAFL	1	total	snRNA	JB289	results/00_download/gse244832/raw/JB289
+JB290	gse244832	MASH	NASH	3	total	snRNA	JB290	results/00_download/gse244832/raw/JB290
+JB303	gse244832	normal	NORMAL	0	total	snRNA	JB303	results/00_download/gse244832/raw/JB303
+JB304	gse244832	MASL	NAFL	1	total	snRNA	JB304	results/00_download/gse244832/raw/JB304
+JB305	gse244832	MASH	NASH	3	total	snRNA	JB305	results/00_download/gse244832/raw/JB305
+JB317	gse244832	normal	NORMAL	0	total	snRNA	JB317	results/00_download/gse244832/raw/JB317
+JB318	gse244832	MASL	NAFL	1	total	snRNA	JB318	results/00_download/gse244832/raw/JB318
+JB319	gse244832	MASH	NASH	3	total	snRNA	JB319	results/00_download/gse244832/raw/JB319
+JB320	gse244832	normal	NORMAL	0	total	snRNA	JB320	results/00_download/gse244832/raw/JB320
+JB321	gse244832	MASH	NASH	3	total	snRNA	JB321	results/00_download/gse244832/raw/JB321
+JB322	gse244832	MASH	NASH	3	total	snRNA	JB322	results/00_download/gse244832/raw/JB322
+JB336	gse244832	normal	NORMAL	0	total	snRNA	JB336	results/00_download/gse244832/raw/JB336
+JB337	gse244832	MASL	NAFL	1	total	snRNA	JB337	results/00_download/gse244832/raw/JB337
+JB338	gse244832	MASH	NASH	3	total	snRNA	JB338	results/00_download/gse244832/raw/JB338
+JB339	gse244832	MASH	NASH	3	total	snRNA	JB339	results/00_download/gse244832/raw/JB339
+JB340	gse244832	MASH	NASH	3	total	snRNA	JB340	results/00_download/gse244832/raw/JB340
+JB341	gse244832	MASH	NASH	3	total	snRNA	JB341	results/00_download/gse244832/raw/JB341

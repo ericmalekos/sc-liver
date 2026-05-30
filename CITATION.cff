@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use this pipeline, please cite it and the underlying datasets and tools."
+title: "Cell-Type-Specific Biomarker Discovery in Human Liver Fibrosis"
+authors:
+  - family-names: Malekos
+    given-names: Eric
+version: 0.1.0
+date-released: 2026-05-29
+references:
+  - type: article
+    title: "Resolving the fibrotic niche of human liver cirrhosis at single-cell level"
+    authors:
+      - family-names: Ramachandran
+        given-names: Prakash
+      - family-names: Henderson
+        given-names: Neil C.
+    journal: Nature
+    year: 2019
+    doi: 10.1038/s41586-019-1631-3
+    notes: "Primary dataset GSE136103."
+  - type: article
+    title: "Multi-modal analysis of human hepatic stellate cells identifies novel therapeutic targets for MASLD"
+    year: 2024
+    journal: Journal of Hepatology
+    notes: "Validation dataset GSE244832."
+  - type: article
+    title: "Best practices for single-cell analysis across modalities"
+    authors:
+      - family-names: Heumos
+        given-names: Lukas
+    journal: Nature Reviews Genetics
+    year: 2023
+    doi: 10.1038/s41576-023-00586-w

@@ -1,0 +1,787 @@
+% Options for packages loaded elsewhere
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+  letterpaper,
+  DIV=11,
+  numbers=noendperiod]{scrartcl}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{5}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+% Make \paragraph and \subparagraph free-standing
+\makeatletter
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\makeatother
+
+
+\usepackage{longtable,booktabs,array}
+\newcounter{none} % for unnumbered tables
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+
+
+
+
+
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
+ 
+
+
+\KOMAoption{captions}{tableheading}
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Cell-Type-Specific Biomarkers in Human Liver Fibrosis},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+
+\title{Cell-Type-Specific Biomarkers in Human Liver Fibrosis}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{Reproducible single-cell discovery pipeline --- full report}
+\author{}
+\date{2026-05-30}
+\begin{document}
+\maketitle
+
+\renewcommand*\contentsname{Table of contents}
+{
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+
+\section{Overview}\label{overview}
+
+This report is generated by the liver-fibrosis pipeline. It
+summarizes QC, integration, annotation, donor-aware differential
+expression, pathway and cell-cell communication mechanism analysis, and
+the AI/ML biomarker prioritization that yields the ranked candidate
+table. Method rationale and citations are in \texttt{docs/methods.md};
+written answers to the screening questions are in
+\texttt{docs/written\_answers.md}.
+
+\section{QC summary}\label{qc-summary}
+
+\begin{verbatim}
+### gse136103
+\end{verbatim}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lllllllllll@{}}
+\toprule\noalign{}
+& sample & dataset & modality & n\_cells\_before & n\_cells\_after &
+n\_genes\_after & pct\_kept & doublets\_removed & mito\_pct\_ceiling &
+n\_mads \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & GSM4041150 & gse136103 & scRNA & 1863 & 1500 & 14780 & 80.5 & 12 &
+6.50 & 3.0 \\
+1 & GSM4041151 & gse136103 & scRNA & 1039 & 600 & 14864 & 57.7 & 6 &
+8.00 & 3.0 \\
+2 & GSM4041152 & gse136103 & scRNA & 478 & 273 & 13919 & 57.1 & 2 & 8.00
+& 3.0 \\
+3 & GSM4041153 & gse136103 & scRNA & 6571 & 5436 & 15774 & 82.7 & 12 &
+3.99 & 3.0 \\
+4 & GSM4041154 & gse136103 & scRNA & 4688 & 3789 & 17294 & 80.8 & 84 &
+4.87 & 3.0 \\
+5 & GSM4041155 & gse136103 & scRNA & 3295 & 2451 & 15723 & 74.4 & 55 &
+6.07 & 3.0 \\
+6 & GSM4041156 & gse136103 & scRNA & 3230 & 2516 & 18372 & 77.9 & 42 &
+8.00 & 3.0 \\
+7 & GSM4041157 & gse136103 & scRNA & 1156 & 820 & 16034 & 70.9 & 13 &
+8.00 & 3.0 \\
+8 & GSM4041158 & gse136103 & scRNA & 4937 & 4035 & 15787 & 81.7 & 96 &
+5.96 & 3.0 \\
+9 & GSM4041159 & gse136103 & scRNA & 3306 & 2809 & 17844 & 85.0 & 48 &
+6.46 & 3.0 \\
+10 & GSM4041160 & gse136103 & scRNA & 5122 & 4223 & 15943 & 82.4 & 19 &
+5.59 & 3.0 \\
+11 & GSM4041161 & gse136103 & scRNA & 2380 & 1779 & 16408 & 74.7 & 10 &
+6.90 & 3.0 \\
+12 & GSM4041162 & gse136103 & scRNA & 1686 & 1186 & 17456 & 70.3 & 3 &
+8.00 & 3.0 \\
+13 & GSM4041163 & gse136103 & scRNA & 2046 & 1208 & 17425 & 59.0 & 9 &
+8.00 & 3.0 \\
+14 & GSM4041164 & gse136103 & scRNA & 3412 & 2611 & 17326 & 76.5 & 40 &
+6.41 & 3.0 \\
+15 & GSM4041165 & gse136103 & scRNA & 3673 & 3034 & 18811 & 82.6 & 37 &
+7.00 & 3.0 \\
+16 & GSM4041166 & gse136103 & scRNA & 1985 & 1539 & 16685 & 77.5 & 8 &
+8.00 & 3.0 \\
+17 & GSM4041167 & gse136103 & scRNA & 3602 & 2934 & 17728 & 81.5 & 63 &
+7.88 & 3.0 \\
+18 & GSM4041168 & gse136103 & scRNA & 4819 & 3782 & 16192 & 78.5 & 7 &
+4.03 & 3.0 \\
+19 & GSM4041169 & gse136103 & scRNA & 2922 & 2279 & 15948 & 78.0 & 14 &
+5.27 & 3.0 \\
+\end{longtable}
+}
+
+\begin{verbatim}
+### gse244832
+\end{verbatim}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lllllllllll@{}}
+\toprule\noalign{}
+& sample & dataset & modality & n\_cells\_before & n\_cells\_after &
+n\_genes\_after & pct\_kept & doublets\_removed & mito\_pct\_ceiling &
+n\_mads \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & JB288 & gse244832 & snRNA & 7492 & 5807 & 22546 & 77.5 & 172 & 0.57
+& 3.0 \\
+1 & JB289 & gse244832 & snRNA & 3447 & 2536 & 17896 & 73.6 & 9 & 0.20 &
+3.0 \\
+2 & JB290 & gse244832 & snRNA & 9148 & 6969 & 23612 & 76.2 & 22 & 0.54 &
+3.0 \\
+3 & JB303 & gse244832 & snRNA & 8739 & 6758 & 21824 & 77.3 & 72 & 0.30 &
+3.0 \\
+4 & JB304 & gse244832 & snRNA & 6531 & 3131 & 19448 & 47.9 & 24 & 0.00 &
+3.0 \\
+5 & JB305 & gse244832 & snRNA & 7134 & 5161 & 22091 & 72.3 & 27 & 0.23 &
+3.0 \\
+6 & JB317 & gse244832 & snRNA & 6223 & 4762 & 21080 & 76.5 & 32 & 0.08 &
+3.0 \\
+7 & JB318 & gse244832 & snRNA & 6867 & 5156 & 22034 & 75.1 & 9 & 0.43 &
+3.0 \\
+8 & JB319 & gse244832 & snRNA & 7541 & 5587 & 23072 & 74.1 & 11 & 0.21 &
+3.0 \\
+9 & JB320 & gse244832 & snRNA & 8056 & 5948 & 21979 & 73.8 & 38 & 0.09 &
+3.0 \\
+10 & JB321 & gse244832 & snRNA & 7325 & 5424 & 22550 & 74.0 & 32 & 0.17
+& 3.0 \\
+11 & JB322 & gse244832 & snRNA & 8703 & 6898 & 22082 & 79.3 & 46 & 0.55
+& 3.0 \\
+12 & JB336 & gse244832 & snRNA & 4260 & 3390 & 20498 & 79.6 & 18 & 0.28
+& 3.0 \\
+13 & JB337 & gse244832 & snRNA & 7960 & 6303 & 22090 & 79.2 & 17 & 0.19
+& 3.0 \\
+14 & JB338 & gse244832 & snRNA & 7244 & 5791 & 22001 & 79.9 & 72 & 0.22
+& 3.0 \\
+15 & JB339 & gse244832 & snRNA & 6936 & 5617 & 21739 & 81.0 & 9 & 0.37 &
+3.0 \\
+16 & JB340 & gse244832 & snRNA & 7452 & 5829 & 22150 & 78.2 & 39 & 0.33
+& 3.0 \\
+17 & JB341 & gse244832 & snRNA & 7165 & 5351 & 21833 & 74.7 & 11 & 0.35
+& 3.0 \\
+\end{longtable}
+}
+
+\section{Integration (scIB) and
+annotation}\label{integration-scib-and-annotation}
+
+\begin{verbatim}
+### gse136103
+\end{verbatim}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lllllll@{}}
+\toprule\noalign{}
+& n\_cells & n\_batches & batch\_silhouette & condition\_silhouette &
+condition\_knn\_accuracy & fibrosis\_signal\_guard\_pass \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & 48804 & 20 & -0.124674 & 0.015627 & 0.618596 & True \\
+\end{longtable}
+}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llllllllllllllllllllll@{}}
+\toprule\noalign{}
+& leiden & n\_cells & cell\_type & compartment & score\_Hepatocyte &
+score\_Cholangiocyte & score\_LSEC & score\_Endothelial\_vasc &
+score\_HSC\_mesenchyme & score\_Portal\_fibroblast & ... &
+score\_Cycling & state\_scar\_associated\_macrophage &
+state\_scar\_associated\_endothelium &
+state\_activated\_HSC\_myofibroblast & state\_quiescent\_HSC &
+state\_activated\_HSC & state\_portal\_fibroblast & state\_myofibroblast
+& state\_vascular\_smc & frac\_fibrotic\_F3plus \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & 0 & 6715 & T\_NK & lymphoid & -0.062 & -0.143 & -0.071 & -0.234 &
+-0.063 & -0.035 & ... & -0.006 & -0.288 & -0.017 & -0.472 & -0.063 &
+-0.086 & -0.035 & -0.586 & -0.075 & 0.290 \\
+1 & 1 & 6246 & T\_NK & lymphoid & -0.084 & -0.093 & -0.057 & -0.186 &
+-0.057 & -0.032 & ... & -0.023 & -0.414 & -0.078 & -0.455 & -0.057 &
+-0.071 & -0.032 & -0.556 & -0.036 & 0.275 \\
+2 & 2 & 5827 & T\_NK & lymphoid & -0.041 & -0.073 & -0.055 & -0.190 &
+-0.050 & -0.004 & ... & -0.051 & -0.492 & -0.094 & -0.387 & -0.050 &
+-0.061 & -0.004 & -0.480 & -0.047 & 0.446 \\
+3 & 3 & 5494 & T\_NK & lymphoid & -0.071 & -0.085 & -0.061 & -0.219 &
+-0.058 & -0.004 & ... & -0.061 & -0.455 & -0.075 & -0.449 & -0.058 &
+-0.073 & -0.004 & -0.539 & -0.050 & 0.380 \\
+4 & 4 & 4437 & Endothelial\_vasc & endothelial & 0.048 & -0.098 & -0.042
+& 1.483 & 0.052 & 0.161 & ... & 0.097 & 0.369 & 0.598 & 0.283 & 0.052 &
+0.075 & 0.161 & -0.085 & -0.116 & 0.718 \\
+5 & 5 & 3705 & DC & myeloid\_other & -0.054 & -0.035 & -0.062 & -0.241 &
+-0.066 & -0.035 & ... & -0.014 & -0.372 & -0.108 & -0.459 & -0.066 &
+-0.083 & -0.035 & -0.528 & -0.079 & 0.354 \\
+6 & 6 & 3659 & Monocyte\_MoMac & macrophage\_monocyte & 0.321 & -0.048 &
+-0.044 & -0.070 & -0.068 & -0.041 & ... & -0.126 & -0.060 & -0.102 &
+-0.149 & -0.068 & -0.082 & -0.041 & -0.151 & -0.112 & 0.491 \\
+7 & 7 & 2141 & T\_NK & lymphoid & -0.064 & -0.082 & -0.069 & -0.221 &
+-0.066 & -0.008 & ... & -0.052 & -0.421 & -0.109 & -0.456 & -0.066 &
+-0.081 & -0.008 & -0.529 & -0.054 & 0.382 \\
+8 & 8 & 1734 & HSC\_mesenchyme & stellate\_myofibroblast & 0.080 & 0.053
+& -0.113 & -0.250 & 0.829 & 0.206 & ... & -0.136 & 0.410 & -0.087 &
+1.785 & 0.829 & 1.012 & 0.206 & 1.831 & 1.929 & 0.300 \\
+9 & 9 & 1665 & B\_plasma & lymphoid & -0.049 & -0.059 & 0.037 & -0.187 &
+-0.058 & -0.033 & ... & 0.014 & -0.498 & -0.111 & -0.435 & -0.058 &
+-0.071 & -0.033 & -0.567 & -0.068 & 0.623 \\
+10 & 10 & 1602 & Kupffer\_resident & macrophage\_monocyte & 0.067 &
+-0.057 & 0.243 & -0.061 & -0.058 & -0.045 & ... & 0.176 & 0.398 & 0.449
+& -0.134 & -0.058 & -0.075 & -0.045 & -0.166 & -0.132 & 0.344 \\
+11 & 11 & 1426 & Monocyte\_MoMac & macrophage\_monocyte & 0.120 & -0.041
+& 0.128 & -0.175 & -0.066 & -0.041 & ... & 0.072 & 0.109 & -0.080 &
+-0.269 & -0.066 & -0.087 & -0.041 & -0.319 & -0.115 & 0.548 \\
+12 & 12 & 1387 & LSEC & endothelial & 0.099 & -0.164 & 1.450 & 0.731 &
+0.218 & 0.071 & ... & -0.052 & 0.025 & 0.274 & 0.533 & 0.218 & 0.267 &
+0.071 & 0.180 & -0.109 & 0.280 \\
+13 & 13 & 1271 & Cholangiocyte & cholangiocyte & 1.334 & 2.944 & -0.127
+& -0.322 & 0.240 & -0.057 & ... & 0.104 & 0.110 & -0.177 & -0.208 &
+0.240 & 0.337 & -0.057 & -0.223 & -0.030 & 0.595 \\
+14 & 14 & 860 & Endothelial\_vasc & endothelial & 0.027 & -0.154 &
+-0.098 & 1.426 & -0.038 & -0.010 & ... & 0.563 & 0.433 & 0.123 & -0.089
+& -0.038 & -0.042 & -0.010 & -0.257 & -0.112 & 0.555 \\
+15 & 15 & 397 & B\_plasma & lymphoid & 0.070 & -0.061 & -0.043 & -0.116
+& -0.046 & -0.007 & ... & 0.117 & -0.131 & -0.052 & -0.215 & -0.046 &
+-0.057 & -0.007 & -0.299 & -0.045 & 0.572 \\
+16 & 16 & 238 & DC & myeloid\_other & -0.129 & -0.111 & -0.095 & -0.173
+& -0.101 & -0.033 & ... & 0.585 & -0.455 & -0.088 & -0.513 & -0.101 &
+-0.118 & -0.033 & -0.620 & -0.118 & 0.668 \\
+\end{longtable}
+}
+
+\begin{verbatim}
+### gse244832
+\end{verbatim}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lllllll@{}}
+\toprule\noalign{}
+& n\_cells & n\_batches & batch\_silhouette & condition\_silhouette &
+condition\_knn\_accuracy & fibrosis\_signal\_guard\_pass \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & 96418 & 18 & -0.201091 & -0.056253 & 0.548084 & False \\
+\end{longtable}
+}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llllllllllllllllllllll@{}}
+\toprule\noalign{}
+& leiden & n\_cells & cell\_type & compartment & score\_Hepatocyte &
+score\_Cholangiocyte & score\_LSEC & score\_Endothelial\_vasc &
+score\_HSC\_mesenchyme & score\_Portal\_fibroblast & ... &
+score\_Cycling & state\_scar\_associated\_macrophage &
+state\_scar\_associated\_endothelium &
+state\_activated\_HSC\_myofibroblast & state\_quiescent\_HSC &
+state\_activated\_HSC & state\_portal\_fibroblast & state\_myofibroblast
+& state\_vascular\_smc & frac\_fibrotic\_F3plus \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & 0 & 22972 & Hepatocyte & hepatocyte & 0.787 & -0.038 & -0.248 &
+-0.045 & -0.101 & -0.043 & ... & 0.000 & -0.016 & -0.030 & -0.056 &
+-0.026 & -0.029 & -0.043 & -0.050 & -0.041 & 0.489 \\
+1 & 1 & 16758 & Hepatocyte & hepatocyte & 0.921 & -0.042 & -0.249 &
+-0.046 & -0.101 & -0.043 & ... & 0.000 & -0.018 & -0.026 & -0.057 &
+-0.028 & -0.033 & -0.043 & -0.051 & -0.042 & 0.420 \\
+2 & 2 & 14292 & Hepatocyte & hepatocyte & 1.071 & -0.045 & -0.167 &
+-0.033 & -0.073 & -0.032 & ... & 0.001 & -0.007 & -0.004 & -0.035 &
+-0.028 & -0.029 & -0.032 & -0.030 & -0.031 & 0.449 \\
+3 & 3 & 9303 & LSEC & endothelial & 0.215 & -0.089 & 0.783 & 0.154 &
+0.083 & -0.027 & ... & 0.001 & 0.040 & 0.047 & 0.022 & -0.054 & -0.065 &
+-0.027 & -0.010 & -0.039 & 0.584 \\
+4 & 4 & 7882 & Hepatocyte & hepatocyte & 0.510 & 0.061 & -0.267 & -0.049
+& -0.111 & -0.048 & ... & 0.002 & -0.007 & -0.006 & -0.053 & -0.051 &
+-0.047 & -0.048 & -0.046 & -0.037 & 0.804 \\
+5 & 5 & 7077 & HSC\_mesenchyme & stellate\_myofibroblast & 0.293 &
+-0.069 & -0.143 & -0.040 & 0.460 & 0.354 & ... & -0.004 & -0.030 &
+-0.031 & 0.475 & 0.299 & 0.174 & 0.354 & 0.412 & 0.290 & 0.828 \\
+6 & 6 & 6414 & LSEC & endothelial & -0.092 & -0.125 & 1.136 & 0.114 &
+0.144 & -0.030 & ... & -0.001 & 0.027 & 0.028 & 0.022 & -0.074 & -0.087
+& -0.030 & -0.026 & -0.051 & 0.594 \\
+7 & 7 & 3633 & Kupffer\_resident & macrophage\_monocyte & 0.356 & -0.060
+& -0.066 & 0.084 & -0.102 & -0.040 & ... & -0.001 & 0.053 & 0.198 &
+-0.037 & -0.073 & -0.086 & -0.040 & -0.010 & 0.006 & 0.584 \\
+8 & 8 & 1734 & Hepatocyte & hepatocyte & 0.795 & 0.012 & -0.096 & 0.012
+& -0.050 & -0.022 & ... & -0.001 & 0.004 & 0.014 & -0.013 & -0.025 &
+-0.029 & -0.022 & -0.002 & -0.017 & 0.557 \\
+9 & 9 & 1692 & Hepatocyte & hepatocyte & 0.768 & -0.060 & -0.254 &
+-0.049 & -0.100 & -0.043 & ... & 0.002 & -0.021 & -0.024 & -0.060 &
+-0.019 & -0.016 & -0.043 & -0.053 & -0.046 & 0.123 \\
+10 & 10 & 1463 & HSC\_mesenchyme & stellate\_myofibroblast & 0.217 &
+-0.088 & -0.136 & -0.036 & 0.344 & 0.087 & ... & -0.003 & 0.001 & -0.056
+& 0.340 & 0.214 & 0.621 & 0.087 & 0.266 & 0.727 & 0.907 \\
+11 & 11 & 1084 & Hepatocyte & hepatocyte & 0.964 & -0.081 & -0.045 &
+-0.019 & 0.022 & 0.034 & ... & -0.002 & -0.006 & -0.002 & 0.084 & 0.035
+& 0.035 & 0.034 & 0.100 & 0.097 & 0.713 \\
+12 & 12 & 970 & Hepatocyte & hepatocyte & 0.870 & 0.017 & -0.247 &
+-0.044 & -0.098 & -0.045 & ... & 0.008 & -0.015 & -0.017 & -0.055 &
+-0.022 & -0.023 & -0.045 & -0.052 & -0.042 & 0.047 \\
+13 & 13 & 852 & Cholangiocyte & cholangiocyte & 0.193 & 0.770 & -0.212 &
+-0.012 & -0.059 & -0.019 & ... & -0.001 & -0.017 & -0.014 & -0.024 &
+0.016 & 0.003 & -0.019 & -0.004 & -0.021 & 0.896 \\
+14 & 14 & 265 & Endothelial\_vasc & endothelial & -0.094 & -0.121 &
+-0.142 & 0.911 & -0.119 & -0.021 & ... & 0.011 & 0.054 & 0.236 & 0.046 &
+-0.083 & -0.095 & -0.021 & -0.017 & -0.052 & 0.992 \\
+15 & 15 & 27 & B\_plasma & lymphoid & 0.469 & -0.185 & -0.187 & 0.128 &
+-0.091 & -0.052 & ... & 0.026 & -0.026 & -0.058 & -0.027 & -0.075 &
+-0.084 & -0.052 & -0.003 & -0.051 & 1.000 \\
+\end{longtable}
+}
+
+\section{Ranked biomarker / target
+candidates}\label{ranked-biomarker-target-candidates}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lllllllllllllllllllll@{}}
+\toprule\noalign{}
+& rank & gene & compartment & composite & direction & log2FoldChange &
+padj & S\_de & S\_specificity & S\_reproducibility & S\_druggability &
+S\_accessibility & S\_ml\_shap & tau & home\_compartment & druggability
+& accessibility\_class & repro\_score & selected & rationale \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & 1.0 & COL1A1 & stellate\_myofibroblast & 0.691758 & up & 4.200554 &
+6.856506e-33 & 1.000000 & 0.993408 & 0.6 & 0.153846 & 1.000000 & 0.0 &
+0.978596 & stellate\_myofibroblast & 0.2 & secreted & 0.6 & True & up in
+fibrosis (LFC=4.20, padj=6.9e-33); stell... \\
+1 & 2.0 & PLVAP & endothelial & 0.537615 & up & 0.216610 & 2.949175e-01
+& 0.001386 & 0.983046 & 1.0 & 0.461538 & 0.714286 & 0.0 & 0.968633 &
+endothelial & 0.4 & surface & 1.0 & True & up in fibrosis (LFC=0.22,
+padj=0.29); endothel... \\
+2 & 3.0 & PLVAP & cholangiocyte & 0.477903 & up & 0.245508 &
+1.000000e+00 & 0.000000 & 0.982373 & 0.3 & 1.000000 & 0.714286 & 0.0 &
+0.968633 & endothelial & 0.4 & surface & 0.3 & True & up in fibrosis
+(LFC=0.25, padj=1); endothelial... \\
+3 & 4.0 & PDGFD & stellate\_myofibroblast & 0.470844 & up & 2.135715 &
+2.325217e-03 & 0.041630 & 0.802183 & 1.0 & 0.000000 & 1.000000 & 0.0 &
+0.798067 & cholangiocyte & 0.1 & secreted & 1.0 & True & up in fibrosis
+(LFC=2.14, padj=0.0023); cholan... \\
+4 & 5.0 & TIMP1 & stellate\_myofibroblast & 0.460425 & up & 3.607559 &
+1.802718e-11 & 0.286885 & 0.497367 & 0.6 & 0.461538 & 1.000000 & 0.0 &
+0.510297 & endothelial & 0.4 & secreted & 0.6 & True & up in fibrosis
+(LFC=3.61, padj=1.8e-11); repro... \\
+5 & 6.0 & RARRES1 & stellate\_myofibroblast & 0.436962 & up & 5.208553 &
+1.603806e-15 & 0.570364 & 0.871856 & 0.6 & 0.000000 & 0.000000 & 0.0 &
+0.863842 & stellate\_myofibroblast & 0.1 & intracellular & 0.6 & True &
+up in fibrosis (LFC=5.21, padj=1.6e-15); stell... \\
+6 & 7.0 & TCEA3 & lymphoid & 0.424862 & up & 1.274200 & 1.953982e-03 &
+0.974097 & 0.906690 & 0.0 & 0.000000 & 0.000000 & 0.0 & 0.902115 &
+cholangiocyte & 0.1 & intracellular & 0.3 & True & up in fibrosis
+(LFC=1.27, padj=0.002); cholang... \\
+7 & 8.0 & PLVAP & lymphoid & 0.419459 & up & 0.061773 & 3.822085e-01 &
+0.007281 & 0.981053 & 0.0 & 1.000000 & 0.714286 & 0.0 & 0.968633 &
+endothelial & 0.4 & surface & 0.3 & True & up in fibrosis (LFC=0.06,
+padj=0.38); endothel... \\
+8 & 9.0 & PLVAP & stellate\_myofibroblast & 0.410429 & up & 2.361775 &
+9.545851e-04 & 0.052796 & 0.982854 & 0.3 & 0.461538 & 0.714286 & 0.0 &
+0.968633 & endothelial & 0.4 & surface & 0.3 & True & up in fibrosis
+(LFC=2.36, padj=0.00095); endot... \\
+9 & 10.0 & VCAN & stellate\_myofibroblast & 0.403982 & up & 4.838793 &
+5.949472e-12 & 0.402039 & 0.917362 & 0.6 & 0.000000 & 0.000000 & 0.0 &
+0.906803 & macrophage\_monocyte & 0.1 & intracellular & 0.6 & True & up
+in fibrosis (LFC=4.84, padj=5.9e-12); macro... \\
+10 & 11.0 & PKIG & lymphoid & 0.402452 & up & 1.249984 & 1.953982e-03 &
+0.955584 & 0.817779 & 0.0 & 0.000000 & 0.000000 & 0.0 & 0.822582 &
+stellate\_myofibroblast & 0.1 & intracellular & 0.3 & True & up in
+fibrosis (LFC=1.25, padj=0.002); stellat... \\
+11 & NaN & IGF1 & stellate\_myofibroblast & 0.398869 & up & 6.067373 &
+1.686865e-10 & 0.438884 & 0.845742 & 0.6 & 0.000000 & 0.000000 & 0.0 &
+0.839189 & macrophage\_monocyte & 0.1 & intracellular & 0.6 & False & up
+in fibrosis (LFC=6.07, padj=1.7e-10); macro... \\
+12 & 12.0 & PLAT & endothelial & 0.398782 & up & 1.786709 & 2.633082e-07
+& 0.141838 & 0.816614 & 1.0 & 0.000000 & 0.000000 & 0.0 & 0.809735 &
+stellate\_myofibroblast & 0.1 & intracellular & 1.0 & True & up in
+fibrosis (LFC=1.79, padj=2.6e-07); stell... \\
+13 & NaN & SPON2 & stellate\_myofibroblast & 0.397940 & up & 3.543599 &
+1.127553e-14 & 0.365828 & 0.932413 & 0.6 & 0.000000 & 0.000000 & 0.0 &
+0.921013 & myeloid\_other & 0.1 & intracellular & 0.6 & False & up in
+fibrosis (LFC=3.54, padj=1.1e-14); myelo... \\
+14 & NaN & CYP3A5 & cholangiocyte & 0.396528 & up & 0.128833 &
+7.183880e-01 & 0.000629 & 0.981851 & 1.0 & 0.000000 & 0.000000 & 0.0 &
+0.968140 & cholangiocyte & 0.1 & intracellular & 1.0 & False & up in
+fibrosis (LFC=0.13, padj=0.72); cholangi... \\
+15 & 13.0 & GLIS3 & endothelial & 0.394191 & up & 0.210646 &
+3.072132e-01 & 0.001303 & 0.969327 & 1.0 & 0.000000 & 0.000000 & 0.0 &
+0.955535 & cholangiocyte & 0.1 & intracellular & 1.0 & True & up in
+fibrosis (LFC=0.21, padj=0.31); cholangi... \\
+16 & NaN & THY1 & stellate\_myofibroblast & 0.393557 & up & 3.591724 &
+1.038368e-14 & 0.371748 & 0.845959 & 0.3 & 0.000000 & 0.714286 & 0.0 &
+0.839394 & stellate\_myofibroblast & 0.1 & surface & 0.3 & False & up in
+fibrosis (LFC=3.59, padj=1e-14); stellat... \\
+17 & 14.0 & MSRB3 & endothelial & 0.387661 & up & 0.205991 &
+3.293021e-01 & 0.001199 & 0.936809 & 1.0 & 0.000000 & 0.000000 & 0.0 &
+0.924489 & stellate\_myofibroblast & 0.1 & intracellular & 1.0 & True &
+up in fibrosis (LFC=0.21, padj=0.33); stellate... \\
+18 & 15.0 & ITGA10 & endothelial & 0.387532 & up & 0.371912 &
+9.939603e-02 & 0.004499 & 0.932035 & 1.0 & 0.000000 & 0.000000 & 0.0 &
+0.919931 & endothelial & 0.1 & intracellular & 1.0 & True & up in
+fibrosis (LFC=0.37, padj=0.099); endothe... \\
+19 & 16.0 & COL1A1 & macrophage\_monocyte & 0.384199 & up & 0.251368 &
+1.000000e+00 & 0.000000 & 0.984632 & 0.3 & 0.181818 & 1.000000 & 0.0 &
+0.978596 & stellate\_myofibroblast & 0.2 & secreted & 0.3 & True & up in
+fibrosis (LFC=0.25, padj=1); stellate\_my... \\
+\end{longtable}
+}
+
+\section{Cross-dataset
+reproducibility}\label{cross-dataset-reproducibility}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llllllllll@{}}
+\toprule\noalign{}
+& gene & compartment & primary\_lfc & primary\_padj & valid\_lfc &
+valid\_padj & in\_validation & sign\_concordant & repro\_score \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & COL1A1 & stellate\_myofibroblast & 4.200554 & 6.856506e-33 &
+0.014812 & 0.944645 & True & True & 0.6 \\
+1 & RARRES1 & stellate\_myofibroblast & 5.208553 & 1.603806e-15 &
+0.024164 & 0.884563 & True & True & 0.6 \\
+2 & THY1 & stellate\_myofibroblast & 3.591724 & 1.038368e-14 & NaN & NaN
+& False & False & 0.3 \\
+3 & SPON2 & stellate\_myofibroblast & 3.543599 & 1.127553e-14 & 0.018130
+& 0.950198 & True & True & 0.6 \\
+4 & MMP23B & stellate\_myofibroblast & 3.879975 & 1.216059e-14 &
+0.040105 & 0.766526 & True & True & 0.6 \\
+5 & SERPINF1 & stellate\_myofibroblast & 3.893982 & 7.351654e-14 &
+0.154161 & 0.353657 & True & True & 0.6 \\
+6 & PCOLCE & stellate\_myofibroblast & 3.064660 & 1.342699e-12 &
+-0.011362 & 0.961934 & True & False & 0.0 \\
+7 & VCAN & stellate\_myofibroblast & 4.838793 & 5.949472e-12 & 0.167890
+& 0.308604 & True & True & 0.6 \\
+8 & TIMP1 & stellate\_myofibroblast & 3.607559 & 1.802718e-11 & 0.088367
+& 0.512660 & True & True & 0.6 \\
+9 & IGF1 & stellate\_myofibroblast & 6.067373 & 1.686865e-10 & 0.009517
+& 0.958014 & True & True & 0.6 \\
+10 & CLEC11A & stellate\_myofibroblast & 2.158003 & 1.764915e-09 &
+-0.002798 & 0.992078 & True & False & 0.0 \\
+11 & F2R & stellate\_myofibroblast & 3.040002 & 2.252211e-09 & 0.080696
+& 0.578285 & True & True & 0.6 \\
+12 & ANXA1 & stellate\_myofibroblast & 2.242300 & 1.453114e-08 &
+0.006513 & 0.972669 & True & True & 0.6 \\
+13 & PRSS23 & stellate\_myofibroblast & 2.492001 & 1.463352e-08 &
+-0.000250 & 0.998576 & True & False & 0.0 \\
+14 & MARCKS & stellate\_myofibroblast & 2.225674 & 1.964695e-08 &
+-0.010241 & 0.970660 & True & False & 0.0 \\
+15 & LY6E & stellate\_myofibroblast & 2.260254 & 1.277759e-07 & 0.056707
+& 0.622666 & True & True & 0.6 \\
+16 & C1R & stellate\_myofibroblast & 2.453280 & 1.915025e-07 & -0.036807
+& 0.878959 & True & False & 0.0 \\
+17 & CFH & stellate\_myofibroblast & 2.361173 & 2.275469e-07 & 0.091428
+& 0.630363 & True & True & 0.6 \\
+18 & CLEC2B & stellate\_myofibroblast & 2.213173 & 4.958362e-07 &
+0.014753 & 0.919614 & True & True & 0.6 \\
+19 & TMEM176B & stellate\_myofibroblast & 2.564379 & 5.914574e-07 &
+-0.034834 & 0.860229 & True & False & 0.0 \\
+\end{longtable}
+}
+
+\section{Mechanism: pathways and cell-cell
+communication}\label{mechanism-pathways-and-cell-cell-communication}
+
+\begin{verbatim}
+### gse136103
+\end{verbatim}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llllll@{}}
+\toprule\noalign{}
+& compartment & condition & source & mean\_activity & level \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & cholangiocyte & cirrhotic & Androgen & -0.2893 & pathway\_progeny \\
+1 & cholangiocyte & healthy & Androgen & -0.1172 & pathway\_progeny \\
+2 & endothelial & cirrhotic & Androgen & -0.7564 & pathway\_progeny \\
+3 & endothelial & healthy & Androgen & 0.0212 & pathway\_progeny \\
+4 & lymphoid & cirrhotic & Androgen & -0.5493 & pathway\_progeny \\
+5 & lymphoid & healthy & Androgen & -0.4430 & pathway\_progeny \\
+6 & macrophage\_monocyte & cirrhotic & Androgen & -0.5279 &
+pathway\_progeny \\
+7 & macrophage\_monocyte & healthy & Androgen & -0.3298 &
+pathway\_progeny \\
+8 & myeloid\_other & cirrhotic & Androgen & -0.5472 &
+pathway\_progeny \\
+9 & myeloid\_other & healthy & Androgen & -0.4813 & pathway\_progeny \\
+10 & stellate\_myofibroblast & cirrhotic & Androgen & -0.9453 &
+pathway\_progeny \\
+11 & stellate\_myofibroblast & healthy & Androgen & -0.9822 &
+pathway\_progeny \\
+12 & cholangiocyte & cirrhotic & EGFR & 3.1096 & pathway\_progeny \\
+13 & cholangiocyte & healthy & EGFR & 2.6224 & pathway\_progeny \\
+14 & endothelial & cirrhotic & EGFR & 2.8408 & pathway\_progeny \\
+\end{longtable}
+}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llllllll@{}}
+\toprule\noalign{}
+& source & target & ligand\_complex & receptor\_complex &
+fibrotic\_condition & delta\_specificity & enriched\_in\_fibrosis \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & stellate\_myofibroblast & endothelial & COL1A1 & ITGA10\_ITGB1 &
+cirrhotic & 5.085660 & True \\
+1 & stellate\_myofibroblast & endothelial & COL1A1 & CD93 & cirrhotic &
+4.282078 & True \\
+2 & stellate\_myofibroblast & stellate\_myofibroblast & COL1A1 &
+ITGA1\_ITGB1 & cirrhotic & 4.122800 & True \\
+3 & stellate\_myofibroblast & cholangiocyte & COL1A1 & ITGA3\_ITGB1 &
+cirrhotic & 3.909519 & True \\
+4 & stellate\_myofibroblast & macrophage\_monocyte & COL1A1 & CD36 &
+cirrhotic & 3.895801 & True \\
+5 & stellate\_myofibroblast & endothelial & COL1A1 & ITGA5 & cirrhotic &
+3.830502 & True \\
+6 & stellate\_myofibroblast & macrophage\_monocyte & COL1A1 & CD44 &
+cirrhotic & 3.753823 & True \\
+7 & stellate\_myofibroblast & stellate\_myofibroblast & COL1A1 &
+ITGA3\_ITGB1 & cirrhotic & 3.670995 & True \\
+8 & cholangiocyte & cholangiocyte & VTN & ITGA3 & cirrhotic & 3.440772 &
+True \\
+9 & stellate\_myofibroblast & macrophage\_monocyte & SERPINF1 & PLXDC2 &
+cirrhotic & 3.384538 & True \\
+10 & endothelial & stellate\_myofibroblast & HSPG2 & LRP1 & cirrhotic &
+3.366328 & True \\
+11 & stellate\_myofibroblast & lymphoid & COL1A1 & CD44 & cirrhotic &
+3.304555 & True \\
+12 & stellate\_myofibroblast & cholangiocyte & COL1A1 & DDR1 & cirrhotic
+& 3.280873 & True \\
+13 & stellate\_myofibroblast & endothelial & COL1A1 & ITGA1\_ITGB1 &
+cirrhotic & 3.245623 & True \\
+14 & cholangiocyte & stellate\_myofibroblast & SERPINA1 & LRP1 &
+cirrhotic & 3.150509 & True \\
+\end{longtable}
+}
+
+\begin{verbatim}
+### gse244832
+\end{verbatim}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llllll@{}}
+\toprule\noalign{}
+& compartment & condition & source & mean\_activity & level \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & cholangiocyte & MASH & Androgen & 1.9949 & pathway\_progeny \\
+1 & cholangiocyte & MASL & Androgen & 1.5644 & pathway\_progeny \\
+2 & cholangiocyte & normal & Androgen & 1.0654 & pathway\_progeny \\
+3 & endothelial & MASH & Androgen & 1.1815 & pathway\_progeny \\
+4 & endothelial & MASL & Androgen & 1.1791 & pathway\_progeny \\
+5 & endothelial & normal & Androgen & 1.6003 & pathway\_progeny \\
+6 & hepatocyte & MASH & Androgen & 3.1214 & pathway\_progeny \\
+7 & hepatocyte & MASL & Androgen & 3.0559 & pathway\_progeny \\
+8 & hepatocyte & normal & Androgen & 2.8863 & pathway\_progeny \\
+9 & lymphoid & MASH & Androgen & 1.3652 & pathway\_progeny \\
+10 & macrophage\_monocyte & MASH & Androgen & 1.2403 &
+pathway\_progeny \\
+11 & macrophage\_monocyte & MASL & Androgen & 0.9226 &
+pathway\_progeny \\
+12 & macrophage\_monocyte & normal & Androgen & 0.9772 &
+pathway\_progeny \\
+13 & stellate\_myofibroblast & MASH & Androgen & 1.5209 &
+pathway\_progeny \\
+14 & stellate\_myofibroblast & MASL & Androgen & 1.4152 &
+pathway\_progeny \\
+\end{longtable}
+}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}llllllll@{}}
+\toprule\noalign{}
+& source & target & ligand\_complex & receptor\_complex &
+fibrotic\_condition & delta\_specificity & enriched\_in\_fibrosis \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & hepatocyte & lymphoid & NTN1 & DCC & MASH & 6.000000 & True \\
+1 & stellate\_myofibroblast & lymphoid & SLIT2 & DCC & MASH & 6.000000 &
+True \\
+2 & macrophage\_monocyte & lymphoid & DSCAM & DCC & MASH & 5.930762 &
+True \\
+3 & cholangiocyte & cholangiocyte & EFNA5 & EPHA6 & MASH & 5.701860 &
+True \\
+4 & endothelial & lymphoid & NTN4 & DCC & MASH & 5.603539 & True \\
+5 & endothelial & lymphoid & APP & DCC & MASH & 5.001666 & True \\
+6 & stellate\_myofibroblast & cholangiocyte & LAMA2 & ITGA2\_ITGB1 &
+MASH & 4.843022 & True \\
+7 & cholangiocyte & stellate\_myofibroblast & NCAM1 & CACNA1C & MASH &
+4.661405 & True \\
+8 & stellate\_myofibroblast & cholangiocyte & LAMA2 & ITGA6\_ITGB4 &
+MASH & 4.360348 & True \\
+9 & stellate\_myofibroblast & cholangiocyte & FGF7 & FGFR2 & MASH &
+4.316337 & True \\
+10 & cholangiocyte & cholangiocyte & NCAM1 & FGFR2 & MASH & 4.219121 &
+True \\
+11 & cholangiocyte & stellate\_myofibroblast & EFNA5 & EPHA3 & MASH &
+3.845104 & True \\
+12 & cholangiocyte & macrophage\_monocyte & EFNA5 & EPHB2 & MASH &
+3.771404 & True \\
+13 & cholangiocyte & cholangiocyte & EFNA5 & EPHB6 & MASH & 3.771404 &
+True \\
+14 & endothelial & cholangiocyte & HSPG2 & ITGA2 & MASH & 3.752628 &
+True \\
+\end{longtable}
+}
+
+
+
+
+\end{document}

@@ -1,0 +1,14 @@
+# Reference: SLURM partition tiers on this cluster (slurm-wlm 21.08.5).
+# The ACTIVE per-rule resource map lives in profiles/slurm/config.yaml (set-resources).
+# This file documents the partition limits those overrides target.
+partitions:
+  short:  {max_runtime_min: 60,    note: "default; ingest/qc/scatter jobs"}
+  medium: {max_runtime_min: 720,   note: "integration, annotation, DE, CCC, ML"}
+  long:   {max_runtime_min: 20160, note: "reserved for very large full-atlas reruns"}
+  gpu:    {gres: "gpu:A100:1 | gpu:A5500:1", note: "only when config.gpu.enabled"}
+
+# To enable GPU methods on the cluster, set in config.yaml:
+#   gpu: {enabled: true, partition: gpu, gres: "gpu:1"}
+# and add to profiles/slurm/config.yaml set-resources, e.g.:
+#   - integrate:slurm_partition="gpu"
+#   - integrate:slurm_extra="--gres=gpu:1"

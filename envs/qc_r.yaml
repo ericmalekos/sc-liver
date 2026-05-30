@@ -1,0 +1,13 @@
+name: sc-qc-r
+channels: [conda-forge, bioconda, nodefaults]
+dependencies:
+  - r-base=4.3.*
+  - bioconductor-scdblfinder=1.16.*
+  - bioconductor-singlecellexperiment
+  - bioconductor-decontx=1.0.*      # ambient RNA (celda/decontX) — works on filtered matrices
+  - r-soupx=1.6.*                   # alternative ambient method
+  - bioconductor-zellkonverter      # read/write .h5ad from R
+  - bioconductor-scuttle
+  - r-matrix
+  - r-jsonlite
+  - r-optparse

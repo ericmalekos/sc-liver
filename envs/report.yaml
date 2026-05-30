@@ -1,0 +1,19 @@
+name: sc-report
+channels: [conda-forge, bioconda, nodefaults]
+# Quarto is NOT on this cluster's PATH, so it is provisioned here along with a
+# TinyTeX/LaTeX toolchain for reproducible PDF rendering. HTML is the fallback.
+dependencies:
+  - python=3.11
+  - quarto>=1.4
+  - jupyter
+  - nbformat
+  - nbclient
+  - ipykernel
+  - papermill
+  - scanpy=1.10.*
+  - matplotlib-base=3.8.*
+  - seaborn=0.13.*
+  - pandas=2.2.*
+  # For PDF output, install the LaTeX toolchain once inside this env:
+  #   quarto install tinytex
+  # (HTML rendering needs no LaTeX; render_report.py falls back to HTML if PDF is unavailable.)

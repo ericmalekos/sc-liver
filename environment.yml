@@ -1,0 +1,20 @@
+# Lightweight DRIVER environment: just enough to run Snakemake, validate config,
+# and render reports. The heavy analysis dependencies live in per-rule envs/ files
+# and are materialized by Snakemake via `--use-conda`.
+name: sc-liver
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  - python=3.11
+  - snakemake-minimal=7.28.3
+  - pulp<2.8           # snakemake 7 scheduler
+  - pandas>=2.1
+  - jsonschema>=4
+  - pyyaml
+  - pre-commit
+  - git
+  # Optional driver extras (uncomment if you want DAG rendering / local report builds):
+  #   - pygraphviz     # `snakemake --dag | dot -Tsvg`
+  #   - quarto>=1.4    # report rendering outside the per-rule report env

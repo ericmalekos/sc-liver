@@ -1,0 +1,30 @@
+# =============================================================================
+# Main workflow. Orchestrates the modular rule files. Config is supplied on the
+# CLI (`--configfile config/config.yaml` or config/config.test.yaml); the default
+# below makes a bare `snakemake` use the full-run config.
+# `rule all` is defined right after common.smk (so final_targets() is available
+# AND it is the first rule -> the reliable default target).
+# =============================================================================
+configfile: "config/config.yaml"
+
+
+include: "rules/common.smk"
+
+
+rule all:
+    input:
+        final_targets(),
+    default_target: True
+
+
+include: "rules/00_download.smk"
+include: "rules/01_ingest.smk"
+include: "rules/02_qc.smk"
+include: "rules/03_integrate.smk"
+include: "rules/04_annotate.smk"
+include: "rules/05_pseudobulk_de.smk"
+include: "rules/06_pathway.smk"
+include: "rules/07_ccc.smk"
+include: "rules/08_score_ml.smk"
+include: "rules/09_crossdataset.smk"
+include: "rules/10_report.smk"

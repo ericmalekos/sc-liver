@@ -1,0 +1,17 @@
+name: sc-integrate-gpu
+channels: [conda-forge, bioconda, nodefaults]
+# GPU-optional deep integration (scVI / scANVI). Selected only when
+# config.gpu.enabled and config.integration.method in {scvi, scanvi}.
+dependencies:
+  - python=3.11
+  - scanpy=1.10.*
+  - anndata>=0.10
+  - zarr
+  - scvi-tools=1.1.*
+  - pytorch>=2.0
+  - leidenalg
+  - scikit-learn=1.4.*
+  - pandas=2.2.*
+  - pip
+  - pip:
+      - scib-metrics==0.5.1

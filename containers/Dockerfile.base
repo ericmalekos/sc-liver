@@ -1,0 +1,19 @@
+# Authoritative reproducible runtime for the CPU pipeline on SLURM.
+# Strategy: ship Snakemake + conda; Snakemake materializes the per-rule envs/
+# inside the container at runtime (`--use-singularity --use-conda`). This keeps the
+# image small and the per-rule pins (envs/*.yaml) the single source of truth.
+FROM condaforge/miniforge3:24.3.0-0
+
+LABEL org.opencontainers.image.title="sc-liver-fibrosis"
+LABEL org.opencontainers.image.description="CPU runtime for the liver-fibrosis biomarker pipeline"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential git procps graphviz wget ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY environment.yml /tmp/environment.yml
+RUN conda env create -f /tmp/environment.yml && conda clean -afy
+
+ENV PATH=/opt/conda/envs/sc-liver/bin:$PATH
+WORKDIR /work
+ENTRYPOINT ["/bin/bash", "-lc"]
