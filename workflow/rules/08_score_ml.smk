@@ -82,6 +82,8 @@ rule compute_score:
         required_compartments=config["score"]["required_compartments"],
         tie_breaker=config["score"]["tie_breaker"],
         require_de_significance=config["score"]["require_de_significance"],
+        require_home_compartment=config["score"]["require_home_compartment"],
+        specificity_ratio_floor=config["score"]["specificity_ratio_floor"],
         padj_threshold=config["de"]["padj_threshold"],
         lfc_threshold=config["de"]["lfc_threshold"],
     log:

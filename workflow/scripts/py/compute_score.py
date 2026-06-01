@@ -24,6 +24,8 @@ required = list(p.required_compartments)
 padj_thr = float(p.padj_threshold)
 lfc_thr = float(p.lfc_threshold)
 require_sig = bool(p.require_de_significance)
+require_home = bool(p.require_home_compartment)
+spec_floor = float(p.specificity_ratio_floor)
 
 feat = pd.read_csv(snakemake.input.features, sep="\t")  # noqa: F821
 shap = pd.read_csv(snakemake.input.shap, sep="\t")  # noqa: F821
@@ -83,6 +85,14 @@ cand = feat[(feat["direction"] == "up") & feat["padj"].notna()].copy()
 # and written out (flagged by `de_significant`) for transparency.
 cand["de_significant"] = (cand["padj"] < padj_thr) & (cand["log2FoldChange"].abs() >= lfc_thr)
 pool = cand[cand["de_significant"]] if require_sig else cand
+# specificity gate: a gene may be ranked in a compartment only where it is genuinely
+# expressed -- relative expression (specificity_ratio) >= floor. The home compartment is
+# always 1.0; a multi-compartment fibrosis gene (MMP2 in stellate ~0.6) clears the floor,
+# while ambient leakage (a macrophage gene at ~0.15 in lymphoid) does not.
+if require_home and "specificity_ratio" in pool.columns:
+    pool = pool[pool["specificity_ratio"].astype(float) >= spec_floor]
+elif require_home and "is_home" in pool.columns:  # fallback if ratio column absent
+    pool = pool[pool["is_home"].astype(str).str.lower().isin(["true", "1", "1.0"])]
 pool = pool.sort_values(["composite"] + [f"S_{t}" for t in p.tie_breaker], ascending=False)
 
 # selection: top-N per required compartment, then fill to top-N overall (from eligible pool)
@@ -101,8 +111,9 @@ cand.loc[cand["selected"], "rank"] = range(1, int(cand["selected"].sum()) + 1)
 
 out_cols = ["rank", "gene", "compartment", "composite", "direction", "log2FoldChange", "padj",
             "S_de", "S_specificity", "S_reproducibility", "S_druggability", "S_accessibility",
-            "S_ml_shap", "tau", "home_compartment", "druggability", "accessibility_class",
-            "repro_score", "de_significant", "selected", "rationale"]
+            "S_ml_shap", "tau", "home_compartment", "is_home", "specificity_ratio",
+            "druggability", "accessibility_class", "repro_score", "de_significant",
+            "selected", "rationale"]
 ensure_parent(snakemake.output.scores)  # noqa: F821
 cand[[c for c in out_cols if c in cand.columns]].to_csv(snakemake.output.scores, sep="\t", index=False)  # noqa: F821
 

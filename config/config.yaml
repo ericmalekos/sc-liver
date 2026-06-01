@@ -70,12 +70,12 @@ metadata:
 # Q2 — QC. Liver-aware, snRNA-aware; preserve stressed/diseased cells.
 qc:
   ambient:
-    # `decontx` is the principled default for filtered matrices and now runs via a light
-    # Python<->R MatrixMarket hand-off (~50s/sample; no zellkonverter/basilisk) — see
-    # qc_ambient_decontx.py + decontx_run.R. The demonstration run still uses `none` only
-    # because both datasets are already cell-filtered (GSE136103) / author-processed
-    # (GSE244832), so ambient removal is low-value here; switch to `decontx` for raw cohorts.
-    method: none               # decontx | soupx | cellbender(GPU-optional) | none
+    # decontX via a light Python<->R MatrixMarket hand-off (~1-2 min/sample on the compute
+    # nodes; no zellkonverter/basilisk) — see qc_ambient_decontx.py + decontx_run.R. ON because
+    # ambient leakage of highly-expressed lineage genes (e.g. SPP1, collagens) into other
+    # compartments produces spurious cross-compartment DE (SPP1 "DE" in lymphoid); decontX
+    # removes it at the source. soupx/cellbender need raw droplets (not the filtered GEO data).
+    method: decontx            # decontx | soupx | cellbender(GPU-optional) | none
   doublets:
     # Scrublet (Python), run with exact (sklearn) kNN — the default annoy backend's pip
     # wheel raises an illegal-instruction (SIGILL) crash on these compute nodes. BLAS is also
@@ -167,6 +167,12 @@ score:
   # headline ranked list -- specificity/druggability alone must not promote a non-DE marker.
   # All up-regulated genes are still scored and written out, flagged by `de_significant`.
   require_de_significance: true
+  # a gene may only be a headline candidate in a compartment where it is genuinely expressed
+  # (relative expression >= specificity_ratio_floor of its peak), so ambient/cross-compartment
+  # leakage (e.g. SPP1 surfacing in lymphoid) can't be ranked, while a multi-compartment
+  # fibrosis gene (MMP2 in stellate) is still eligible. Home compartment is always 1.0.
+  require_home_compartment: true
+  specificity_ratio_floor: 0.5
 
 # Q6 — ML layer (donor-grouped CV; no donor leakage).
 ml:
