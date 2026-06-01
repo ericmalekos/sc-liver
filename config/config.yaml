@@ -163,6 +163,10 @@ score:
   required_compartments: [stellate_myofibroblast, macrophage_monocyte, endothelial]
   # literature positives for the recall sanity check (workflow/scripts/py/known_positive_recall.py)
   known_positives: resources/known_positive_markers.tsv
+  # only DE-significant genes (de.padj_threshold & de.lfc_threshold) are eligible for the
+  # headline ranked list -- specificity/druggability alone must not promote a non-DE marker.
+  # All up-regulated genes are still scored and written out, flagged by `de_significant`.
+  require_de_significance: true
 
 # Q6 — ML layer (donor-grouped CV; no donor leakage).
 ml:

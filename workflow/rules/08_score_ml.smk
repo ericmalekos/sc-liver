@@ -81,6 +81,9 @@ rule compute_score:
         top_n_overall=config["score"]["top_n_overall"],
         required_compartments=config["score"]["required_compartments"],
         tie_breaker=config["score"]["tie_breaker"],
+        require_de_significance=config["score"]["require_de_significance"],
+        padj_threshold=config["de"]["padj_threshold"],
+        lfc_threshold=config["de"]["lfc_threshold"],
     log:
         "logs/08_score/compute_score.log",
     conda:

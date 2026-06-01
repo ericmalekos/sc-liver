@@ -21,6 +21,9 @@ log = get_logger(snakemake)  # noqa: F821
 p = snakemake.params  # noqa: F821
 W = dict(p.weights)
 required = list(p.required_compartments)
+padj_thr = float(p.padj_threshold)
+lfc_thr = float(p.lfc_threshold)
+require_sig = bool(p.require_de_significance)
 
 feat = pd.read_csv(snakemake.input.features, sep="\t")  # noqa: F821
 shap = pd.read_csv(snakemake.input.shap, sep="\t")  # noqa: F821
@@ -73,16 +76,22 @@ feat["rationale"] = feat.apply(rationale, axis=1)
 
 # candidates = up-regulated, DE-tested
 cand = feat[(feat["direction"] == "up") & feat["padj"].notna()].copy()
-cand = cand.sort_values(["composite"] + [f"S_{t}" for t in p.tie_breaker],
-                        ascending=False)
 
-# selection: top-N per required compartment, then fill to top-N overall
+# DE significance gate: only genes that genuinely change in disease are ELIGIBLE for the
+# headline list. Specificity/druggability/accessibility must not float a non-DE lineage
+# marker (e.g. padj~1) into the ranked candidates. Every up-regulated gene is still scored
+# and written out (flagged by `de_significant`) for transparency.
+cand["de_significant"] = (cand["padj"] < padj_thr) & (cand["log2FoldChange"].abs() >= lfc_thr)
+pool = cand[cand["de_significant"]] if require_sig else cand
+pool = pool.sort_values(["composite"] + [f"S_{t}" for t in p.tie_breaker], ascending=False)
+
+# selection: top-N per required compartment, then fill to top-N overall (from eligible pool)
 selected = []
 for comp in required:
-    sub = cand[cand["compartment"] == comp].head(int(p.top_n_per_compartment))
+    sub = pool[pool["compartment"] == comp].head(int(p.top_n_per_compartment))
     selected.append(sub)
-sel = pd.concat(selected) if selected else cand.head(0)
-remaining = cand[~cand.index.isin(sel.index)]
+sel = pd.concat(selected) if selected else pool.head(0)
+remaining = pool[~pool.index.isin(sel.index)]
 fill = remaining.head(max(0, int(p.top_n_overall) - len(sel)))
 sel = pd.concat([sel, fill]).sort_values("composite", ascending=False)
 sel = sel.head(int(p.top_n_overall))
@@ -93,7 +102,7 @@ cand.loc[cand["selected"], "rank"] = range(1, int(cand["selected"].sum()) + 1)
 out_cols = ["rank", "gene", "compartment", "composite", "direction", "log2FoldChange", "padj",
             "S_de", "S_specificity", "S_reproducibility", "S_druggability", "S_accessibility",
             "S_ml_shap", "tau", "home_compartment", "druggability", "accessibility_class",
-            "repro_score", "selected", "rationale"]
+            "repro_score", "de_significant", "selected", "rationale"]
 ensure_parent(snakemake.output.scores)  # noqa: F821
 cand[[c for c in out_cols if c in cand.columns]].to_csv(snakemake.output.scores, sep="\t", index=False)  # noqa: F821
 
