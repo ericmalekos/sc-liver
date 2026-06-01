@@ -22,6 +22,67 @@ cell-cell communication → AI/ML biomarker prioritization → ranked 10–20 ca
 
 ---
 
+## Pipeline
+
+End-to-end execution order (Snakemake rule graph):
+
+![Pipeline DAG](docs/figures/00_pipeline_dag.png)
+
+Each stage below shows a representative output from the **primary** cohort (GSE136103); the
+pipeline regenerates all figures under `results/*/figures/` for both cohorts.
+
+### 1 · Data acquisition & metadata harmonization
+GEO `GSE136103_RAW.tar` → per-sample 10x matrices; heterogeneous fibrosis labels mapped to a
+common ordinal axis with a binary F2+ split (`make_samplesheet.py`, `harmonize_metadata.py`).
+
+### 2 · Quality control
+Adaptive MAD filtering, liver/modality-aware mitochondrial ceiling, decontX ambient removal (with
+cluster priors), Scrublet doublets — stressed/diseased cells deliberately retained *(one example
+sample shown)*.
+
+![QC example](docs/figures/02_qc_example.png)
+
+### 3 · Integration — batch-correct over donor, never disease
+Harmony over `sample_id`; scIB metrics plus a fibrosis-signal guard that fails the run if the
+disease axis collapses. Batches mix while condition is preserved.
+
+![Integration UMAP](docs/figures/03_integration_umap.png)
+![scIB metrics](docs/figures/03_integration_scib.png)
+
+### 4 · Annotation & compartment validation
+Leiden + marker scoring → cell types rolled to compartments, with disease-state and
+stromal-discriminator scores written to `compartment_validation.tsv`.
+
+![Cell-type UMAP](docs/figures/04_annotation_umap.png)
+![Marker dotplot](docs/figures/04_annotation_markers.png)
+
+### 5 · Donor-aware DE + niche-level DE
+Donor-level pseudobulk DESeq2 (replication unit = donor) per compartment, plus a subcluster-level
+**niche** stage that recovers disease-subset biomarkers (PLVAP, TREM2) the compartment test
+buries → `results/05_de/`.
+
+### 6 · Mechanism — pathway / TF activity & cell–cell communication
+decoupler (PROGENy pathways, CollecTRI TFs) + GSEA; LIANA consensus ligand–receptor with
+downstream-target corroboration.
+
+![Pathway / TF activity](docs/figures/06_pathway_activity.png)
+
+### 7 · Cross-dataset reproducibility
+DE direction/rank concordance between primary and validation cohorts *(honest caveat: weak in
+this cohort pair — see the Limitations section of [`docs/written_answers.md`](docs/written_answers.md))*.
+
+![Cross-dataset concordance](docs/figures/07_crossdataset_concordance.png)
+
+### 8 · Biomarker prioritization & known-positive recall
+Composite score (DE effect · cell-type specificity · cross-dataset reproducibility · druggability
+· accessibility · explainable ML/SHAP), gated on DE significance and specificity. A known-positive
+recall benchmark checks recovery of literature markers and explains any misses.
+
+![Top candidates](docs/figures/08_top_candidates.png)
+![Known-positive recall](docs/figures/08_known_positive_recall.png)
+
+---
+
 ## Repository layout
 
 ```
