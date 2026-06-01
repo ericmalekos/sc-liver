@@ -61,9 +61,52 @@ for ds in DS:
 
 ## Ranked biomarker / target candidates
 
+The headline list is gated on differential-expression significance (compartment-level DESeq2
+*or* a disease-associated-subcluster marker) and on cell-type specificity, so each candidate is
+a genuine, compartment-specific disease signal rather than an abundant lineage marker.
+Candidates flagged `in_disease_niche` are recovered from a disease-associated subpopulation that
+compartment-level pseudobulk averages out (e.g. scar-associated endothelium / macrophages).
+
 ```{python}
 scores = read_tsv(RD / "08_score/candidate_scores.tsv")
-display(scores.head(20))
+sel = scores[scores.get("selected", "").astype(str).str.lower() == "true"] if not scores.empty else scores
+cols = [c for c in ["rank", "gene", "compartment", "composite", "log2FoldChange", "padj",
+                    "de_significant", "in_disease_niche", "niche_padj", "accessibility_class",
+                    "druggability", "repro_score", "rationale"] if c in sel.columns]
+if not sel.empty and "rank" in sel.columns:
+    sel = sel.sort_values("rank")
+display(sel[cols] if cols else scores.head(20))
+```
+
+## Known-positive recall (sanity check)
+
+Does the pipeline recover biomarkers already established in the human-liver-fibrosis literature,
+and where a known positive is missed, *why* (non-significant / filtered / absent)? Panel:
+`resources/known_positive_markers.tsv`.
+
+```{python}
+display(read_tsv(RD / "08_score/known_positive_recall_summary.tsv"))
+rec = read_tsv(RD / "08_score/known_positive_recall.tsv")
+if not rec.empty:
+    rcols = [c for c in ["gene", "compartment", "found_status", "rank", "primary_padj",
+                         "validation_status", "rescued_by_validation"] if c in rec.columns]
+    display(rec[rcols])
+```
+
+## Niche (subpopulation) structure
+
+Disease-associated subclusters within each compartment (donor-aware enrichment, valid within a
+sorted compartment); their one-vs-rest markers are the subset biomarkers folded into the ranked
+list above — recovering signals (PLVAP, TREM2, …) that compartment-level pseudobulk buries.
+
+```{python}
+for ds in DS:
+    nsum = read_tsv(RD / f"05_de/{ds}/niche_summary.tsv")
+    if not nsum.empty and "disease_associated" in nsum.columns:
+        da = nsum[nsum["disease_associated"].astype(str).str.lower() == "true"]
+        if not da.empty:
+            print(f"### {ds}")
+            display(da.sort_values("disease_log2fc", ascending=False))
 ```
 
 ## Cross-dataset reproducibility
