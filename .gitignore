@@ -35,6 +35,9 @@ __pycache__/
 .RData
 .Rproj.user/
 
+# ---- quarto build logs (rendered .tex/.html are kept; logs are noise) ----
+workflow/report/*.log
+
 # ---- editors / OS ----
 .vscode/
 .idea/
