@@ -161,6 +161,8 @@ score:
   top_n_overall: 20
   tie_breaker: [reproducibility, de]
   required_compartments: [stellate_myofibroblast, macrophage_monocyte, endothelial]
+  # literature positives for the recall sanity check (workflow/scripts/py/known_positive_recall.py)
+  known_positives: resources/known_positive_markers.tsv
 
 # Q6 — ML layer (donor-grouped CV; no donor leakage).
 ml:

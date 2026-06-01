@@ -87,3 +87,46 @@ rule compute_score:
         env("ml.yaml")
     script:
         script_py("compute_score.py")
+
+
+# Sanity check (Q6): does the ranked list recover known literature positives, and if a
+# known positive is missed, WHY (non-significant / filtered / absent in primary)? Each is
+# cross-referenced against the validation DE to flag primary-anchored false negatives.
+def known_positive_recall_input(wc):
+    valid_present = [d for d in VALID_DS if samples_of(d)]
+    return {
+        "candidates": "results/08_score/candidate_scores.tsv",
+        "primary_de": expand(
+            "results/05_de/{ds}/{compartment}/de_results.tsv",
+            ds=PRIMARY_DS,
+            compartment=COMPARTMENTS,
+        ),
+        "primary_counts": expand(
+            "results/05_de/{ds}/{compartment}/pseudobulk_counts.tsv",
+            ds=PRIMARY_DS,
+            compartment=COMPARTMENTS,
+        ),
+        "valid_de": expand(
+            "results/05_de/{ds}/{compartment}/de_results.tsv",
+            ds=valid_present,
+            compartment=COMPARTMENTS,
+        ),
+    }
+
+
+rule known_positive_recall:
+    input:
+        unpack(known_positive_recall_input),
+    output:
+        recall="results/08_score/known_positive_recall.tsv",
+        summary="results/08_score/known_positive_recall_summary.tsv",
+        fig="results/08_score/figures/known_positive_recall.png",
+    params:
+        panel=config["score"]["known_positives"],
+        padj_threshold=config["de"]["padj_threshold"],
+    log:
+        "logs/08_score/known_positive_recall.log",
+    conda:
+        env("ml.yaml")
+    script:
+        script_py("known_positive_recall.py")

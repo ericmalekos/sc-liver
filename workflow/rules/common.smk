@@ -146,6 +146,7 @@ def final_targets():
     # convergence (only if the primary dataset has samples)
     if PRIMARY_DS in ds_ok:
         t.append("results/08_score/candidate_scores.tsv")
+        t.append("results/08_score/known_positive_recall.tsv")
         if config["crossdataset"]["enabled"]:
             t.append("results/09_crossdataset/repro_scores.tsv")
         t.append("results/10_report/report.html")

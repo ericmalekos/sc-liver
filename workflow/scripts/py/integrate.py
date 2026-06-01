@@ -25,7 +25,13 @@ batch_key = p.batch_key
 n_hvg = int(p.n_hvg)
 
 adatas = [sc.read_h5ad(f) for f in snakemake.input.h5ads]  # noqa: F821
-adata = ad.concat(adatas, join="inner", index_unique=None, merge="same")
+# OUTER join (union of genes), NOT inner: with FACS-sorted samples (CD45+/CD45-), an inner
+# join keeps only genes detected in EVERY sample, which silently deletes the cell-type-
+# specific markers that fibrosis biology lives in (TREM2/SPP1 in macrophages, COL3A1/PDGFRB
+# in mesenchyme) before pseudobulk DE ever sees them. Missing genes fill with 0 (true zeros
+# for cells of the wrong sorted fraction); DESeq2's own per-compartment filter handles the
+# rest. PCA/integration still run on HVGs only, so the embedding is unchanged.
+adata = ad.concat(adatas, join="outer", fill_value=0, index_unique=None, merge="same")
 adata.obs_names_make_unique()
 adata.layers["counts"] = adata.layers.get("counts", adata.X).copy()
 log.info(f"Concatenated {len(adatas)} samples -> {adata.n_obs} cells x {adata.n_vars} genes; "

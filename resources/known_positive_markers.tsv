@@ -1,0 +1,43 @@
+# Known-positive liver-fibrosis biomarkers for recall benchmarking (Q6 sanity check).
+# Curated from the primary study (Ramachandran 2019, GSE136103), the scar-associated
+# macrophage program (Fabre 2023, Sci Immunol), the SMOC2 plasma-biomarker paper
+# (GSE207310 / JHEP Reports 2022), and standard hepatology. direction = expected sign in
+# fibrosis (all 'up' here). compartment must match the pipeline's analysis compartments.
+gene	compartment	direction	source
+COL1A1	stellate_myofibroblast	up	Ramachandran2019;collagen
+COL1A2	stellate_myofibroblast	up	collagen
+COL3A1	stellate_myofibroblast	up	Ramachandran2019;collagen
+COL6A3	stellate_myofibroblast	up	collagen
+COL5A1	stellate_myofibroblast	up	collagen
+ACTA2	stellate_myofibroblast	up	HSC_activation;aSMA
+TAGLN	stellate_myofibroblast	up	HSC_activation
+TIMP1	stellate_myofibroblast	up	Iredale;matrix_remodeling
+PDGFRB	stellate_myofibroblast	up	mesenchyme;activation
+PDGFRA	stellate_myofibroblast	up	Ramachandran2019;fibrogenic_mesenchyme
+PDGFD	stellate_myofibroblast	up	PDGF_axis
+LOXL1	stellate_myofibroblast	up	collagen_crosslinking
+LOXL2	stellate_myofibroblast	up	collagen_crosslinking;clinical_target
+TGFB1	stellate_myofibroblast	up	master_fibrogenic_cytokine
+VCAN	stellate_myofibroblast	up	proteoglycan
+DCN	stellate_myofibroblast	up	decorin;proteoglycan
+LUM	stellate_myofibroblast	up	lumican;proteoglycan
+SPARC	stellate_myofibroblast	up	matricellular
+CCN2	stellate_myofibroblast	up	CTGF;fibrogenic
+FN1	stellate_myofibroblast	up	fibronectin
+SMOC2	stellate_myofibroblast	up	JHEP2022;HSC_secreted_plasma_biomarker
+THY1	stellate_myofibroblast	up	CD90;activated_portal_fibroblast
+MMP2	stellate_myofibroblast	up	matrix_remodeling
+TREM2	macrophage_monocyte	up	Ramachandran2019;Fabre2023;SAMac
+CD9	macrophage_monocyte	up	Fabre2023;SAMac
+SPP1	macrophage_monocyte	up	SAMac;osteopontin
+GPNMB	macrophage_monocyte	up	Fabre2023;SAMac
+FABP5	macrophage_monocyte	up	Fabre2023;SAMac
+CD63	macrophage_monocyte	up	Fabre2023;SAMac
+LGMN	macrophage_monocyte	up	SAMac;legumain
+PLVAP	endothelial	up	Ramachandran2019;scar_endothelium
+ACKR1	endothelial	up	Ramachandran2019;scar_endothelium
+VWA1	endothelial	up	scar_endothelium
+CD34	endothelial	up	capillarized_endothelium
+KRT19	cholangiocyte	up	ductular_reaction
+KRT7	cholangiocyte	up	ductular_reaction
+SOX9	cholangiocyte	up	ductular_reaction
