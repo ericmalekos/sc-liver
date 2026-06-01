@@ -137,6 +137,8 @@ def final_targets():
         t.append(f"results/02_qc/{ds}/qc_summary.tsv")
         t.append(f"results/03_integrate/{ds}/scib_metrics.tsv")
         t.append(f"results/04_annotate/{ds}/compartment_validation.tsv")
+        if config["niche"]["enabled"]:
+            t.append(f"results/05_de/{ds}/niche_summary.tsv")
         for comp in COMPARTMENTS:
             t.append(f"results/05_de/{ds}/{comp}/de_results.tsv")
             t.append(f"results/06_pathway/{ds}/{comp}/gsea.tsv")

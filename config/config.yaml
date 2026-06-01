@@ -122,6 +122,15 @@ de:
     gse136103: {name: cirrhotic_vs_healthy, group: condition, ref: healthy, test: cirrhotic}
     gse244832: {name: F2plus_vs_low, group: fibrosis_bin, ref: low, test: high}
 
+# Q5/Q6 — niche (subpopulation) markers: recover disease-associated subset biomarkers that
+# compartment-level pseudobulk averages away (SAMac TREM2/CD9, scar-endothelium PLVAP/ACKR1).
+niche:
+  enabled: true
+  resolution: 1.0               # within-compartment Leiden subclustering resolution
+  min_cells_subcluster: 30
+  enrichment_min_log2fc: 0.585  # >=1.5x disease-donor enrichment to call a subcluster disease-associated
+  marker_padj: 0.05             # one-vs-rest marker FDR for niche biomarkers
+
 # Q7 (mechanism) — pathway / TF activity + enrichment.
 pathway:
   progeny_top: 500
@@ -167,6 +176,10 @@ score:
   # headline ranked list -- specificity/druggability alone must not promote a non-DE marker.
   # All up-regulated genes are still scored and written out, flagged by `de_significant`.
   require_de_significance: true
+  # fold in niche (subpopulation) markers: a gene significant as a marker of a disease-
+  # associated subcluster is eligible even if compartment-level pseudobulk DE buries it
+  # (e.g. PLVAP, TREM2). Its DE signal becomes max(compartment, niche).
+  use_niche: true
   # a gene may only be a headline candidate in a compartment where it is genuinely expressed
   # (relative expression >= specificity_ratio_floor of its peak), so ambient/cross-compartment
   # leakage (e.g. SPP1 surfacing in lymphoid) can't be ranked, while a multi-compartment

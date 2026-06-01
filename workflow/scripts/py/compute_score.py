@@ -36,7 +36,17 @@ feat["shap_importance"] = feat.get("shap_importance", pd.Series(index=feat.index
 
 # raw component signals
 feat["padj"] = feat["padj"].fillna(1.0)
-feat["de_signal"] = feat["log2FoldChange"].abs() * -np.log10(feat["padj"].clip(lower=1e-300))
+comp_sig = feat["log2FoldChange"].abs() * -np.log10(feat["padj"].clip(lower=1e-300))
+# fold in niche signal: a marker of a disease-associated subcluster contributes its (much
+# stronger) subset-level evidence, so genes the compartment pseudobulk buries (PLVAP, TREM2)
+# still score on their real biology.
+if "in_disease_niche" in feat.columns:
+    nyes = feat["in_disease_niche"].astype(str).str.lower().isin(["true", "1", "1.0"])
+    npadj = pd.to_numeric(feat.get("niche_padj", 1.0), errors="coerce").fillna(1.0).clip(lower=1e-300)
+    nsig = nyes.astype(float) * feat["niche_lfc"].abs() * -np.log10(npadj)
+    feat["de_signal"] = np.maximum(comp_sig, nsig)
+else:
+    feat["de_signal"] = comp_sig
 comp_raw = {
     "de": "de_signal",
     "specificity": "tau",
@@ -62,6 +72,8 @@ feat["composite"] = sum(W[k] * feat[f"S_{k}"] for k in W)
 # rationale string
 def rationale(r):
     bits = [f"{r['direction']} in fibrosis (LFC={r['log2FoldChange']:.2f}, padj={r['padj']:.2g})"]
+    if bool(r.get("in_disease_niche", False)) and float(r.get("niche_padj", 1.0)) < 0.05:
+        bits.append(f"disease-niche (subcluster) marker (padj={float(r['niche_padj']):.1g})")
     if r["tau"] >= 0.7:
         bits.append(f"{r['home_compartment']}-specific (tau={r['tau']:.2f})")
     if r.get("repro_score", 0) >= 0.6:
@@ -84,7 +96,16 @@ cand = feat[(feat["direction"] == "up") & feat["padj"].notna()].copy()
 # marker (e.g. padj~1) into the ranked candidates. Every up-regulated gene is still scored
 # and written out (flagged by `de_significant`) for transparency.
 cand["de_significant"] = (cand["padj"] < padj_thr) & (cand["log2FoldChange"].abs() >= lfc_thr)
-pool = cand[cand["de_significant"]] if require_sig else cand
+# niche significance: a gene marking a disease-associated subcluster is eligible even when
+# compartment-level pseudobulk DE buries it (subset-level evidence, e.g. PLVAP / TREM2).
+if "in_disease_niche" in cand.columns:
+    _nyes = cand["in_disease_niche"].astype(str).str.lower().isin(["true", "1", "1.0"])
+    _npadj = pd.to_numeric(cand["niche_padj"], errors="coerce").fillna(1.0)
+    cand["niche_significant"] = _nyes & (_npadj < padj_thr) & (cand["niche_lfc"].abs() >= lfc_thr)
+else:
+    cand["niche_significant"] = False
+cand["eligible"] = cand["de_significant"] | cand["niche_significant"]
+pool = cand[cand["eligible"]] if require_sig else cand
 # specificity gate: a gene may be ranked in a compartment only where it is genuinely
 # expressed -- relative expression (specificity_ratio) >= floor. The home compartment is
 # always 1.0; a multi-compartment fibrosis gene (MMP2 in stellate ~0.6) clears the floor,
@@ -113,7 +134,7 @@ out_cols = ["rank", "gene", "compartment", "composite", "direction", "log2FoldCh
             "S_de", "S_specificity", "S_reproducibility", "S_druggability", "S_accessibility",
             "S_ml_shap", "tau", "home_compartment", "is_home", "specificity_ratio",
             "druggability", "accessibility_class", "repro_score", "de_significant",
-            "selected", "rationale"]
+            "in_disease_niche", "niche_padj", "niche_significant", "selected", "rationale"]
 ensure_parent(snakemake.output.scores)  # noqa: F821
 cand[[c for c in out_cols if c in cand.columns]].to_csv(snakemake.output.scores, sep="\t", index=False)  # noqa: F821
 

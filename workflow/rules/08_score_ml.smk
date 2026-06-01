@@ -12,6 +12,8 @@ def build_features_input(wc):
     }
     if config["crossdataset"]["enabled"]:
         inp["repro"] = "results/09_crossdataset/repro_scores.tsv"
+    if config["niche"]["enabled"] and config["score"]["use_niche"]:
+        inp["niche"] = f"results/05_de/{PRIMARY_DS}/niche_markers.tsv"
     return inp
 
 

@@ -75,6 +75,16 @@ if "repro" in snakemake.input.keys():  # noqa: F821
                   on=["gene", "compartment"], how="left")
 de["repro_score"] = de.get("repro_score", pd.Series(index=de.index)).fillna(0.3)
 
+# --- niche (subpopulation) markers: disease-associated-subcluster signal per gene ---
+if "niche" in snakemake.input.keys():  # noqa: F821
+    nm = pd.read_csv(snakemake.input.niche, sep="\t")  # noqa: F821
+    if not nm.empty:
+        de = de.merge(nm[["gene", "compartment", "niche_lfc", "niche_padj", "in_disease_niche"]],
+                      on=["gene", "compartment"], how="left")
+de["in_disease_niche"] = de.get("in_disease_niche", pd.Series(index=de.index)).fillna(False).astype(bool)
+de["niche_lfc"] = de.get("niche_lfc", pd.Series(index=de.index)).fillna(0.0)
+de["niche_padj"] = de.get("niche_padj", pd.Series(index=de.index)).fillna(1.0)
+
 # --- druggability (cached snapshot; fallback default low) ---
 drug = {}
 cache = p.druggability_cache
@@ -111,7 +121,8 @@ de["fibrosis_geneset_member"] = de["gene"].isin(fib_genes).astype(int)
 ensure_parent(snakemake.output.features)  # noqa: F821
 keep = ["gene", "compartment", "log2FoldChange", "stat", "padj", "baseMean", "direction",
         "tau", "home_compartment", "is_home", "specificity_ratio", "repro_score", "druggability",
-        "accessibility_class", "accessibility_score", "fibrosis_geneset_member"]
+        "accessibility_class", "accessibility_score", "fibrosis_geneset_member",
+        "niche_lfc", "niche_padj", "in_disease_niche"]
 de[[c for c in keep if c in de.columns]].to_csv(snakemake.output.features, sep="\t", index=False)  # noqa: F821
 log.info(f"feature matrix: {len(de)} (gene x compartment) rows across "
          f"{de['compartment'].nunique()} compartments")
