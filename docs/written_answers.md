@@ -5,6 +5,13 @@ inline) and points to where the practical pipeline in this repository implements
 symbols are human (HGNC). Abbreviations: HSC = hepatic stellate cell; SAMac = scar-associated
 macrophage; DE = differential expression; sc/sn = single-cell / single-nucleus.
 
+The pipeline was then **adversarially stress-tested against its own outputs**. Where that review
+found the implementation diverged from the intended design, the code was fixed and the relevant
+answer below notes it; where a limitation is genuine (small cohort, weak cross-dataset
+reproducibility) it is stated rather than hidden. The closing **Limitations** section collects
+these, and the `known_positive_recall` stage is the regression check that keeps the answers and
+the code honest with each other.
+
 ---
 
 ## Q1 — Dataset curation and fibrosis-stage harmonization
@@ -34,9 +41,12 @@ sc vs sn) are not confounded with stage.
 maps labels to the axis via `config.metadata.fibrosis_mapping`; `harmonize_metadata.py` emits a
 per-dataset harmonized samplesheet with the axis + a binary F2+ split + cell counts; and the
 **cross-dataset reproducibility** step (`crossdataset_repro.py`) is the biological validation —
-it checks that DE *direction* agrees between the primary (GSE136103) and validation (GSE244832)
-cohorts despite their different scales, etiologies, and modalities. A key honest caveat we
-surface: **GSE136103's public metadata is only healthy-vs-cirrhotic (binary)**, so staged
+it tests whether DE *direction/rank* agrees between the primary (GSE136103) and validation
+(GSE244832) cohorts. **Honest result:** in this pair the genome-wide rank correlation is ~0
+(slightly negative in places), because the cohorts differ in disease (cirrhosis vs MASH),
+modality (sorted scRNA vs whole-tissue snRNA), and composition, so this component currently
+reflects sign-coincidence more than true replication (see **Limitations**). A second honest
+caveat: **GSE136103's public metadata is only healthy-vs-cirrhotic (binary)**, so staged
 contrasts come from the graded validation cohort. We hit this problem for real with the
 validation set: **GSE244832's GEO sample metadata carries no disease/stage labels at all**
 (just `tissue: liver` + an internal code), so the cohort grouping had to be recovered from the
@@ -57,7 +67,12 @@ the single-cell best-practices book (Heumos et al. 2023, *Nat Rev Genet*).
 - **Ambient RNA.** CellBender (Fleming et al. 2023) and SoupX need the *raw, unfiltered* droplet
   matrix and are ideal when available; for the **filtered** matrices GEO typically ships,
   **decontX** (Yang et al., celda) estimates contamination from the expression itself and is the
-  right default — implemented in `workflow/scripts/R/qc_ambient.R`.
+  right default — implemented as a light Python↔R MatrixMarket hand-off
+  (`qc_ambient_decontx.py` + `decontx_run.R`, avoiding the zellkonverter/basilisk bridge) and
+  **run with cluster priors** so it removes *cross-population* ambient without stripping a
+  population's genuine markers. This is **on by default**, and it matters: the review found that
+  with it off, ambient leakage of high-expressors (SPP1, collagens) into other compartments
+  produced spurious cross-compartment DE.
 - **Doublets.** **scDblFinder** has the best benchmarked AUPRC (Germain et al. 2022); Scrublet is
   a solid Python option. We support both (`scdblfinder.R` / `qc_doublets.py`).
 - **Adaptive thresholds, not fixed cutoffs.** Filter on **median ± n·MAD** (n=3–5) of
@@ -102,6 +117,16 @@ scANVI when `gpu.enabled`) and **retains the full gene set** (PCA on HVGs only) 
 all genes. `scib_benchmark.py` reports batch-mixing vs. condition-separation metrics and enforces
 a **fibrosis-signal guard** that fails the run if condition is no longer separable post-
 integration — a concrete safeguard against over-correction.
+
+**A real bug the review caught here.** "Retains the full gene set" was the *intent*, but the
+original concatenation used an **inner join** (gene intersection across samples). On the
+FACS-sorted primary (CD45+/CD45− fractions), that kept only genes detected in *every* sample and
+silently deleted the cell-type-specific markers fibrosis lives in — TREM2/SPP1 (macrophage),
+COL3A1/PDGFRB (mesenchyme) — *before* pseudobulk DE ever saw them (gene space 33,694 → 11,059).
+The fix was a one-line switch to an **outer join** (union, zero-filled), restoring the gene space
+to ~21,929 and making the claim above actually true. The fibrosis-signal *guard* does not catch
+this class of error (the embedding looked fine); the **known-positive recall** check does, and now
+guards against its return.
 
 ---
 
@@ -159,9 +184,20 @@ Report effect sizes and CIs, not just p-values.
 
 **In this pipeline.** `pseudobulk_aggregate.py` sums counts to donor level per compartment with a
 `min_cells_per_donor` gate; `deseq2_pseudobulk.R` runs DESeq2 (default) / edgeR / muscat with a
-covariate-aware design, **writing an explicit "insufficient donors" status rather than a spurious
-result** when a group is underpowered. This donor→DE boundary is the scientific crux of the whole
-project.
+covariate-aware design (`ashr`-shrunk LFCs for ranking), **writing an explicit "insufficient
+donors" status rather than a spurious result** when a group is underpowered. This donor→DE
+boundary is the scientific crux of the whole project.
+
+**Honest scope.** Covariates are added only when present *and* non-confounded with the contrast.
+In GSE136103's public metadata **sex and etiology are absent** and `sort_gate` is largely
+collinear with compartment, so the realized design reduces to `~ condition` — the ideal covariate
+set above is the recommendation, not what this cohort supports. And the cohort is **small**: e.g.
+stellate and cholangiocyte are **3 vs 3 donors**, so those compartments are underpowered and
+their effect sizes have wide CIs. Because compartment-level pseudobulk also *averages over* the
+disease-emergent subsets where the signal concentrates, a complementary **niche-level DE** stage
+(`niche_markers.py`) subclusters within each compartment, flags disease-enriched subclusters
+(donor-aware), and surfaces their markers — recovering subset biomarkers (PLVAP, TREM2) that the
+compartment test buries.
 
 ---
 
@@ -186,15 +222,28 @@ decisions.
    healthy trained on **donor-level pseudobulk with donor-grouped cross-validation** (no cell or
    donor leakage), with **SHAP** values giving per-gene importance.
 
-The ML layer is **additive and audited**, not a black box driving the ranking: a gene with high
-SHAP but no DE support is surfaced separately as an "ML-only hypothesis." We report a **weight-
-sensitivity analysis** so the ranking's robustness is visible, and select **top-N per required
-compartment first** (so each disease compartment is represented) before filling to the overall
-top-20.
+The ML layer is **additive and audited**, not a black box driving the ranking, and we select
+**top-N per required compartment first** (so each disease compartment is represented) before
+filling to the overall top-20.
 
-**In this pipeline.** `build_features.py` (features), `ml_classifier_shap.py` (donor-grouped
-XGBoost + SHAP), and `compute_score.py` (within-compartment normalized composite, configurable
-weights, per-candidate rationale) produce `results/08_score/candidate_scores.tsv`.
+**Honest result on the ML signal.** With only ~5 donors per group, donor-grouped CV accuracy is
+at **chance (~0.5)** across compartments — the classifier cannot generalize at this cohort size —
+so SHAP is non-informative here. It is weighted low (0.10) and contributes essentially nothing to
+the current ranking; we keep it for transparency, not as a working differentiator, and say so
+rather than dress it up. **Two gates added after the review do the real work** of keeping the list
+defensible: (i) a **DE-significance gate** — a candidate must be significant in the
+compartment-level test *or* as a disease-niche-subcluster marker (the ungated composite floated
+~half the top-20 as non-significant lineage markers); and (ii) a **specificity gate** — a gene is
+eligible only in a compartment where it is genuinely expressed (relative-expression ratio ≥ 0.5),
+which removes ambient/cross-compartment leakage (e.g. SPP1 surfacing in lymphoid).
+
+**In this pipeline.** `build_features.py` (features, including the niche signal),
+`ml_classifier_shap.py` (donor-grouped XGBoost + SHAP), and `compute_score.py` (within-compartment
+normalized composite, DE + specificity gates, niche fold-in, per-candidate rationale) produce
+`results/08_score/candidate_scores.tsv`. A **known-positive recall** check
+(`known_positive_recall.py`, panel in `resources/known_positive_markers.tsv`) reports how many
+literature markers the ranked list recovers and *why* any are missed — currently **10/37
+selected**, the remaining gap being small-n dilution rather than a scoring defect.
 
 ---
 
@@ -264,3 +313,37 @@ proves the *whole* pipeline runs on the fixture, not just that it parses.
 
 **Final deliverables**: GitHub repo + README; QC summary; cell-annotation figures; DE + pathway
 results; ranked biomarker/target table; 1–2 page executive summary; and these written answers.
+
+---
+
+## Limitations (surfaced, not hidden)
+
+An adversarial self-review drove the fixes noted above (gene-space collapse → outer join;
+ungated/cross-compartment ranking → DE-significance + specificity gates; ambient off → decontX
+with cluster priors; compartment-averaging → niche-level DE). The following limitations are
+**genuine and largely not fixable by code** — they are stated plainly because a target-discovery
+decision should rest on them:
+
+- **Cross-dataset reproducibility is weak.** Genome-wide primary↔validation DE rank correlation
+  is ~0; only ~1% of primary-significant genes are also significant in the validation. This is a
+  *data-cohort* mismatch (cirrhosis scRNA-sorted vs MASH snRNA whole-tissue), not a pipeline bug —
+  it did not move across any code fix. Real validation needs a **matched scRNA cohort**; for
+  *secreted* candidates, **GSE207310** offers an orthogonal tissue-bulk + **plasma** axis
+  (the SMOC2 template). Until then, translational confidence rests on biological plausibility and
+  niche-level evidence, not on the current cross-dataset agreement.
+- **Small cohort.** 5 vs 5 donors (and only **3 vs 3** for the CD45− stellate/cholangiocyte
+  compartments) → underpowered DE for rare compartments, donor-grouped ML at chance, and wide
+  effect-size CIs. More donors, not more code, is the fix.
+- **FACS-sorted primary (GSE136103).** It captures CD45+/CD45− fractions, so **hepatocytes are
+  essentially absent** and **cell-type *proportions* are artifactual** — no compositional /
+  abundance claims are made on the primary (within-compartment niche enrichment is still valid).
+- **Subset dilution persists for some markers.** Canonical genes like **SMOC2** and **PDGFRB** are
+  non-significant at the compartment level (a subpopulation effect); niche-level DE recovers some
+  (PLVAP, TREM2) but not all. The `known_positive_recall` table records each miss and its reason.
+- **Druggability/accessibility use a dated offline snapshot** and **pathway/CCC** depend on
+  external resources (OmniPath, LIANA) with documented offline fallbacks — convenient and
+  reproducible, but not live.
+
+These are tracked by the `known_positive_recall` regression check and the risk register
+(`docs/risks.md`). Net: the discovery side is now trustworthy and honestly bounded; the highest-
+value next step is **data** (a matched validation cohort and more donors), not further code.
