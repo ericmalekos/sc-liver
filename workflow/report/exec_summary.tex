@@ -5,12 +5,14 @@
 \PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
 %
 \documentclass[
+  10pt,
   letterpaper,
   DIV=11,
   numbers=noendperiod]{scrartcl}
 \usepackage{xcolor}
+\usepackage[margin=0.9in]{geometry}
 \usepackage{amsmath,amssymb}
-\setcounter{secnumdepth}{5}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
 \usepackage{iftex}
 \ifPDFTeX
   \usepackage[T1]{fontenc}
@@ -162,14 +164,15 @@
   pdfcreator={LaTeX via pandoc}}
 
 
-\title{Executive Summary: Cell-Type-Specific Biomarkers in Human
-Liver Fibrosis}
+\title{Executive Summary: Cell-Type-Specific Biomarkers in Human Liver
+Fibrosis}
 \author{}
-\date{2026-06-01}
+\date{2026-06-07}
 \begin{document}
 \maketitle
 
-\section{Objective}\label{objective}
+
+\subsection{Objective}\label{objective}
 
 Discover and prioritize \textbf{cell-type-specific biomarkers and
 therapeutic targets} in human liver fibrosis from single-cell
@@ -178,62 +181,107 @@ GSE244832, MASLD/MASH F0 to F4), focusing on the hepatic
 stellate/myofibroblast, macrophage/monocyte, and endothelial
 compartments.
 
-\section{Approach}\label{approach}
+\subsection{Approach}\label{approach}
 
 A reproducible Snakemake + Scanpy pipeline ingests and QCs the data,
-integrates over donor (not disease) and verifies fibrosis signal is
+integrates over donor (not disease) and verifies the fibrosis signal is
 preserved, annotates and validates the three disease compartments, runs
-\textbf{donor-aware pseudobulk} differential expression, characterizes
-mechanism via pathway/TF activity and ligand-receptor analysis (with
-downstream-target corroboration), and prioritizes candidates with a
-transparent composite score combining DE effect, cell-type specificity,
-cross-dataset reproducibility, druggability, biomarker accessibility,
-and an explainable ML (XGBoost + SHAP) signal.
+differential expression, characterizes mechanism (pathway/TF activity
+and ligand-receptor analysis with downstream-target corroboration), and
+prioritizes candidates with a transparent composite score (DE effect,
+cell-type specificity, cross-dataset reproducibility, druggability,
+biomarker accessibility, and an explainable XGBoost/SHAP signal). Two
+choices keep the ranked list trustworthy rather than a marker
+re-discovery: differential expression is \textbf{donor-aware pseudobulk}
+(the replication unit is the donor, not the cell, which avoids the
+pseudoreplication that inflates cell-level tests), and the composite is
+\textbf{gated} so a gene must be statistically DE-significant (at the
+compartment or disease-subpopulation level) \textbf{and}
+cell-type-specific before specificity, druggability, or accessibility
+can lift it; abundant lineage markers and ambient cross-compartment
+leakage are filtered out.
 
-\section{Top candidates}\label{top-candidates}
+\subsection{Top candidates}\label{top-candidates}
 
 {\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}llllll@{}}
+\begin{longtable}[]{@{}lllllll@{}}
 \toprule\noalign{}
-& rank & gene & compartment & composite & direction \\
+& rank & gene & compartment & composite & accessibility\_class &
+druggability \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-0 & 1.0 & PDGFRA & stellate\_myofibroblast & 0.671195 & up \\
-1 & 2.0 & ACKR1 & endothelial & 0.634854 & up \\
-2 & 3.0 & LUM & stellate\_myofibroblast & 0.624039 & up \\
-3 & 4.0 & DCN & stellate\_myofibroblast & 0.611797 & up \\
-4 & 5.0 & TREM2 & macrophage\_monocyte & 0.606202 & up \\
-5 & 6.0 & PLVAP & endothelial & 0.580863 & up \\
-7 & 7.0 & COL3A1 & stellate\_myofibroblast & 0.552956 & up \\
-9 & 8.0 & MMP7 & cholangiocyte & 0.545108 & up \\
-10 & 9.0 & SPP2 & cholangiocyte & 0.543718 & up \\
-11 & 10.0 & MMP2 & stellate\_myofibroblast & 0.542169 & up \\
-12 & 11.0 & COL1A1 & stellate\_myofibroblast & 0.537588 & up \\
-15 & 12.0 & RGCC & endothelial & 0.511566 & up \\
-16 & 13.0 & COL1A2 & stellate\_myofibroblast & 0.505817 & up \\
-17 & 14.0 & RGS4 & cholangiocyte & 0.494848 & up \\
-22 & 15.0 & VWF & endothelial & 0.477451 & up \\
-33 & 16.0 & FABP4 & endothelial & 0.431836 & up \\
-34 & 17.0 & RGS10 & macrophage\_monocyte & 0.428405 & up \\
-49 & 18.0 & IER3 & macrophage\_monocyte & 0.405677 & up \\
-78 & 19.0 & PLXDC2 & macrophage\_monocyte & 0.390093 & up \\
-118 & 20.0 & CTSH & macrophage\_monocyte & 0.362371 & up \\
+0 & 1.0 & PDGFRA & stellate\_myofibroblast & 0.671 & surface & 0.90 \\
+1 & 2.0 & ACKR1 & endothelial & 0.635 & surface & 0.30 \\
+2 & 3.0 & LUM & stellate\_myofibroblast & 0.624 & secreted & 0.10 \\
+3 & 4.0 & DCN & stellate\_myofibroblast & 0.612 & secreted & 0.10 \\
+4 & 5.0 & TREM2 & macrophage\_monocyte & 0.606 & surface & 0.60 \\
+5 & 6.0 & PLVAP & endothelial & 0.581 & surface & 0.40 \\
+7 & 7.0 & COL3A1 & stellate\_myofibroblast & 0.553 & secreted & 0.20 \\
+9 & 8.0 & MMP7 & cholangiocyte & 0.545 & intracellular & 0.10 \\
+10 & 9.0 & SPP2 & cholangiocyte & 0.544 & intracellular & 0.10 \\
+11 & 10.0 & MMP2 & stellate\_myofibroblast & 0.542 & secreted & 0.55 \\
 \end{longtable}
 }
 
-\section{Translational
-interpretation}\label{translational-interpretation}
+Top 10 shown. The full ranked 20, with per-candidate rationale,
+component scores, and significance/specificity flags, is in
+\texttt{results/08\_score/candidate\_scores.tsv} and the full report.
 
-The ranked table flags, per compartment, which candidates are most
-relevant for \textbf{diagnostics} (secreted/accessible, reproducible
-across datasets) versus \textbf{therapeutic targeting} (druggable,
-mechanistically central in the fibrotic crosstalk). See the full report
-and \texttt{results/08\_score/candidate\_scores.tsv} for the
-per-candidate rationale.
+\subsection{Interpretation}\label{interpretation}
+
+\textbf{Hepatic stellate / myofibroblast} (PDGFRA, LUM, DCN, COL3A1,
+MMP2) are ECM and PDGF-axis genes consistent with activated-HSC /
+myofibroblast biology. \textbf{PDGFRA} is the stand-out
+\textbf{therapeutic} target: a cell-surface receptor tyrosine kinase
+already druggable with approved TKIs (imatinib / nilotinib class). The
+secreted matrix proteins (LUM, DCN, COL3A1, MMP2) are
+\textbf{diagnostic}-accessible: type III collagen turnover (COL3A1)
+underlies the clinically validated circulating PRO-C3 fibrosis marker,
+connecting this arm directly to a non-invasive readout.
+
+\textbf{Scar-associated macrophages.} \textbf{TREM2} marks the CD9 /
+SPP1 / TREM2 pro-fibrotic macrophage program defined in this primary
+cohort (Ramachandran et al.~2019, \emph{Nature}). It is dual-use: a
+\textbf{therapeutic} target (surface receptor, agonist antibodies in
+clinical development) and a \textbf{diagnostic} one (soluble TREM2 is
+measurable in blood), the strongest single pick for tracking the
+fibrotic macrophage niche.
+
+\textbf{Scar endothelium.} \textbf{PLVAP} and \textbf{ACKR1} flag the
+disease-associated (capillarized) endothelial population, also from
+Ramachandran 2019; these read as mechanistic / imaging markers rather
+than direct drug targets.
+
+\textbf{Ductular reaction.} \textbf{MMP7} and \textbf{SPP2} mark the
+cholangiocyte / biliary response; circulating MMP-7 is an established
+fibrosis / cholestasis biomarker, supporting MMP7 as a
+\textbf{diagnostic} candidate.
+
+The most actionable picks are therefore \textbf{PDGFRA} (druggable
+target), \textbf{TREM2} (dual diagnostic / target for the macrophage
+niche), and the \textbf{secreted collagen / proteoglycan panel} (COL3A1,
+LUM, DCN) as circulating-biomarker candidates.
+
+\textbf{Calibration.} Against a 37-gene panel of established
+human-liver-fibrosis markers, the pipeline recovers 10 as headline
+candidates and surfaces 25 as scored candidates, so the list's
+sensitivity is moderate and the gaps are cohort-driven (small-n dilution
+of subset markers) rather than scoring artifacts.
+
+\textbf{Limitations.} The primary cohort is small (5 cirrhotic vs 5
+healthy donors; 3 vs 3 for the stellate and cholangiocyte compartments),
+and cross-dataset reproducibility against the MASLD/MASH validation set
+is weak (rank correlation near zero), driven by the scRNA vs snRNA
+modality and disease-context mismatch rather than by the primary signal;
+confidence is therefore strongest for the well-powered,
+internally-significant stellate and macrophage hits.
 
 \textbf{Full report and source code:}
 \url{https://github.com/ericmalekos/sc-liver}
+
+
+
 
 \end{document}

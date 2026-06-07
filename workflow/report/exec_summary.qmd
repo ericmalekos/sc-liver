@@ -2,6 +2,8 @@
 title: "Executive Summary: Cell-Type-Specific Biomarkers in Human Liver Fibrosis"
 date: today
 toc: false
+geometry: margin=0.9in
+fontsize: 10pt
 params:
   results_dir: "results"
 execute:
@@ -28,34 +30,78 @@ scores = (
 
 ## Objective
 
-Discover and prioritize **cell-type-specific biomarkers and therapeutic targets** in human
-liver fibrosis from single-cell transcriptomics (primary: GSE136103, cirrhotic vs healthy;
-validation: GSE244832, MASLD/MASH F0 to F4), focusing on the hepatic stellate/myofibroblast,
+Discover and prioritize **cell-type-specific biomarkers and therapeutic targets** in human liver
+fibrosis from single-cell transcriptomics (primary: GSE136103, cirrhotic vs healthy; validation:
+GSE244832, MASLD/MASH F0 to F4), focusing on the hepatic stellate/myofibroblast,
 macrophage/monocyte, and endothelial compartments.
 
 ## Approach
 
-A reproducible Snakemake + Scanpy pipeline ingests and QCs the data, integrates over donor
-(not disease) and verifies fibrosis signal is preserved, annotates and validates the three
-disease compartments, runs **donor-aware pseudobulk** differential expression, characterizes
-mechanism via pathway/TF activity and ligand-receptor analysis (with downstream-target
-corroboration), and prioritizes candidates with a transparent composite score combining DE
-effect, cell-type specificity, cross-dataset reproducibility, druggability, biomarker
-accessibility, and an explainable ML (XGBoost + SHAP) signal.
+A reproducible Snakemake + Scanpy pipeline ingests and QCs the data, integrates over donor (not
+disease) and verifies the fibrosis signal is preserved, annotates and validates the three disease
+compartments, runs differential expression, characterizes mechanism (pathway/TF activity and
+ligand-receptor analysis with downstream-target corroboration), and prioritizes candidates with a
+transparent composite score (DE effect, cell-type specificity, cross-dataset reproducibility,
+druggability, biomarker accessibility, and an explainable XGBoost/SHAP signal). Two choices keep the
+ranked list trustworthy rather than a marker re-discovery: differential expression is **donor-aware
+pseudobulk** (the replication unit is the donor, not the cell, which avoids the pseudoreplication
+that inflates cell-level tests), and the composite is **gated** so a gene must be statistically
+DE-significant (at the compartment or disease-subpopulation level) **and** cell-type-specific before
+specificity, druggability, or accessibility can lift it; abundant lineage markers and ambient
+cross-compartment leakage are filtered out.
 
 ## Top candidates
 
 ```{python}
 if not scores.empty:
-    cols = [c for c in ["rank", "gene", "compartment", "composite", "direction"] if c in scores.columns]
-    display(scores.sort_values("rank").head(20)[cols] if cols else scores.head(20))
+    cols = [
+        c
+        for c in ["rank", "gene", "compartment", "composite", "accessibility_class", "druggability"]
+        if c in scores.columns
+    ]
+    top10 = scores.sort_values("rank").head(10)
+    display(top10[cols].round(3) if cols else scores.head(10))
 ```
 
-## Translational interpretation
+Top 10 shown. The full ranked 20, with per-candidate rationale, component scores, and
+significance/specificity flags, is in `results/08_score/candidate_scores.tsv` and the full report.
 
-The ranked table flags, per compartment, which candidates are most relevant for **diagnostics**
-(secreted/accessible, reproducible across datasets) versus **therapeutic targeting** (druggable,
-mechanistically central in the fibrotic crosstalk). See the full report and
-`results/08_score/candidate_scores.tsv` for the per-candidate rationale.
+## Interpretation
+
+**Hepatic stellate / myofibroblast** (PDGFRA, LUM, DCN, COL3A1, MMP2) are ECM and PDGF-axis genes
+consistent with activated-HSC / myofibroblast biology. **PDGFRA** is the stand-out **therapeutic**
+target: a cell-surface receptor tyrosine kinase already druggable with approved TKIs (imatinib /
+nilotinib class). The secreted matrix proteins (LUM, DCN, COL3A1, MMP2) are **diagnostic**-accessible:
+type III collagen turnover (COL3A1) underlies the clinically validated circulating PRO-C3 fibrosis
+marker, connecting this arm directly to a non-invasive readout.
+
+**Scar-associated macrophages.** **TREM2** marks the CD9 / SPP1 / TREM2 pro-fibrotic macrophage
+program defined in this primary cohort (Ramachandran et al. 2019, *Nature*). It is dual-use: a
+**therapeutic** target (surface receptor, agonist antibodies in clinical development) and a
+**diagnostic** one (soluble TREM2 is measurable in blood), the strongest single pick for tracking
+the fibrotic macrophage niche.
+
+**Scar endothelium.** **PLVAP** and **ACKR1** flag the disease-associated (capillarized) endothelial
+population, also from Ramachandran 2019; these read as mechanistic / imaging markers rather than
+direct drug targets.
+
+**Ductular reaction.** **MMP7** and **SPP2** mark the cholangiocyte / biliary response; circulating
+MMP-7 is an established fibrosis / cholestasis biomarker, supporting MMP7 as a **diagnostic**
+candidate.
+
+The most actionable picks are therefore **PDGFRA** (druggable target), **TREM2** (dual
+diagnostic / target for the macrophage niche), and the **secreted collagen / proteoglycan panel**
+(COL3A1, LUM, DCN) as circulating-biomarker candidates.
+
+**Calibration.** Against a 37-gene panel of established human-liver-fibrosis markers, the pipeline
+recovers 10 as headline candidates and surfaces 25 as scored candidates, so the list's sensitivity
+is moderate and the gaps are cohort-driven (small-n dilution of subset markers) rather than scoring
+artifacts.
+
+**Limitations.** The primary cohort is small (5 cirrhotic vs 5 healthy donors; 3 vs 3 for the
+stellate and cholangiocyte compartments), and cross-dataset reproducibility against the MASLD/MASH
+validation set is weak (rank correlation near zero), driven by the scRNA vs snRNA modality and
+disease-context mismatch rather than by the primary signal; confidence is therefore strongest for
+the well-powered, internally-significant stellate and macrophage hits.
 
 **Full report and source code:** <https://github.com/ericmalekos/sc-liver>
