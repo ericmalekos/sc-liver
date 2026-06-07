@@ -174,12 +174,11 @@ Fibrosis}
 
 \subsection{Objective}\label{objective}
 
-Discover and prioritize \textbf{cell-type-specific biomarkers and
-therapeutic targets} in human liver fibrosis from single-cell
-transcriptomics (primary: GSE136103, cirrhotic vs healthy; validation:
-GSE244832, MASLD/MASH F0 to F4), focusing on the hepatic
-stellate/myofibroblast, macrophage/monocyte, and endothelial
-compartments.
+Discover and prioritize cell-type-specific biomarkers and therapeutic
+targets in human liver fibrosis from single-cell transcriptomics
+(primary: GSE136103, cirrhotic vs healthy; validation: GSE244832,
+MASLD/MASH F0 to F4), focusing on the hepatic stellate/myofibroblast,
+macrophage/monocyte, and endothelial compartments.
 
 \subsection{Approach}\label{approach}
 
@@ -192,14 +191,13 @@ prioritizes candidates with a transparent composite score (DE effect,
 cell-type specificity, cross-dataset reproducibility, druggability,
 biomarker accessibility, and an explainable XGBoost/SHAP signal). Two
 choices keep the ranked list trustworthy rather than a marker
-re-discovery: differential expression is \textbf{donor-aware pseudobulk}
-(the replication unit is the donor, not the cell, which avoids the
+re-discovery: differential expression is donor-aware pseudobulk (the
+replication unit is the donor, not the cell, which avoids the
 pseudoreplication that inflates cell-level tests), and the composite is
-\textbf{gated} so a gene must be statistically DE-significant (at the
-compartment or disease-subpopulation level) \textbf{and}
-cell-type-specific before specificity, druggability, or accessibility
-can lift it; abundant lineage markers and ambient cross-compartment
-leakage are filtered out.
+gated so a gene must be statistically DE-significant (at the compartment
+or disease-subpopulation level) and cell-type-specific before
+specificity, druggability, or accessibility can lift it; abundant
+lineage markers and ambient cross-compartment leakage are filtered out.
 
 \subsection{Top candidates}\label{top-candidates}
 
