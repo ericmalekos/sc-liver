@@ -111,6 +111,38 @@ for sp in ["top", "right"]:
 fig.savefig(f"{OUT}/05_de_volcano.png", dpi=140, bbox_inches="tight")
 plt.close(fig)
 
+# --- Section 7: cross-dataset concordance (per compartment, labeled contrasts) ---
+from scipy.stats import spearmanr  # noqa: E402
+
+rp = pd.read_csv("results/09_crossdataset/repro_scores.tsv", sep="\t")
+rp = rp[rp["in_validation"].astype(str).str.lower() == "true"].dropna(
+    subset=["primary_lfc", "valid_lfc"])
+comps7 = sorted(rp["compartment"].unique())
+pal7 = {c: TAB10[i % len(TAB10)] for i, c in enumerate(comps7)}
+fig, ax = plt.subplots(figsize=(6.4, 5.8))
+ax.axline((0, 0), (1, 1), color="#bbbbbb", lw=0.9, ls="--", zorder=0)  # y = x (perfect agreement)
+ax.axhline(0, color="#e8e8e8", lw=0.6); ax.axvline(0, color="#e8e8e8", lw=0.6)
+handles7 = []
+for c in comps7:
+    d = rp[rp["compartment"] == c]
+    ax.scatter(d["primary_lfc"], d["valid_lfc"], s=6, color=pal7[c], alpha=0.5,
+               linewidths=0, rasterized=True)
+    rho = spearmanr(d["primary_lfc"], d["valid_lfc"], nan_policy="omit").correlation \
+        if len(d) >= 5 else float("nan")
+    handles7.append(Line2D([0], [0], marker="o", linestyle="", markersize=6, color=pal7[c],
+                           label=f"{c}  (rho={rho:.2f}, n={len(d)})"))
+ax.set_xlim(-5, 5); ax.set_ylim(-5, 5)
+ax.set_xlabel("primary log2FC   (GSE136103: cirrhotic vs healthy, scRNA)", fontsize=8.5)
+ax.set_ylabel("validation log2FC   (GSE244832: MASH F2+ vs low, snRNA)", fontsize=8.5)
+ax.set_title("Cross-dataset DE concordance, matched per compartment", fontsize=10)
+ax.legend(handles=handles7, title="compartment (Spearman rho)", fontsize=7,
+          title_fontsize=7.5, frameon=False, loc="upper left")
+ax.tick_params(labelsize=8)
+for sp in ["top", "right"]:
+    ax.spines[sp].set_visible(False)
+fig.savefig(f"{OUT}/07_crossdataset_concordance.png", dpi=140, bbox_inches="tight")
+plt.close(fig)
+
 # --- Section 8: ranked candidates with compartment color legend ---
 cs = pd.read_csv("results/08_score/candidate_scores.tsv", sep="\t")
 sel = cs[cs["selected"].astype(str).str.lower() == "true"].sort_values("composite")

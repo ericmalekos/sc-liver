@@ -76,8 +76,12 @@ downstream-target corroboration.
 ![Pathway / TF activity](docs/figures/06_pathway_activity.png)
 
 ### 7 · Cross-dataset reproducibility
-DE direction/rank concordance between primary and validation cohorts *(honest caveat: weak in
-this cohort pair; see the Limitations section of [`docs/written_answers.md`](docs/written_answers.md))*.
+For each **compartment** (cell-type-matched), the donor-aware DE of the **primary** cohort
+(GSE136103, cirrhotic vs healthy, scRNA) is compared gene-by-gene against the **validation** cohort
+(GSE244832, MASH F2+ vs low, snRNA), by fold-change direction and rank. Every point is one gene in
+one compartment; the dashed diagonal marks perfect agreement. *(Honest result: concordance is weak
+in this cohort pair, Spearman rho near 0 in every compartment, reflecting the disease, modality, and
+composition differences; see the Limitations in [`docs/written_answers.md`](docs/written_answers.md).)*
 
 ![Cross-dataset concordance](docs/figures/07_crossdataset_concordance.png)
 
