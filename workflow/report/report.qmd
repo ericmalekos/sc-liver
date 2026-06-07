@@ -9,6 +9,23 @@ params:
 execute:
   echo: false
   warning: false
+format:
+  html:
+    toc: true
+  pdf:
+    include-in-header:
+      text: |
+        \usepackage[margin=0.6in]{geometry}
+        \usepackage{etoolbox}
+        \AtBeginEnvironment{longtable}{\scriptsize}
+        \setlength{\tabcolsep}{3pt}
+  latex:
+    include-in-header:
+      text: |
+        \usepackage[margin=0.6in]{geometry}
+        \usepackage{etoolbox}
+        \AtBeginEnvironment{longtable}{\scriptsize}
+        \setlength{\tabcolsep}{3pt}
 ---
 
 ```{python}
@@ -43,20 +60,23 @@ answers to the screening questions are in `docs/written_answers.md`.
 ## QC summary
 
 ```{python}
+qc_cols = ["sample", "n_cells_before", "n_cells_after", "pct_kept", "doublets_removed", "mito_pct_ceiling"]
 for ds in DS:
     df = read_tsv(RD / f"02_qc/{ds}/qc_summary.tsv")
     if not df.empty:
         print(f"### {ds}")
-        display(df)
+        display(df[[c for c in qc_cols if c in df.columns]])
 ```
 
 ## Integration (scIB) and annotation
 
 ```{python}
+cv_cols = ["leiden", "n_cells", "cell_type", "compartment", "frac_fibrotic_F3plus"]
 for ds in DS:
     print(f"### {ds}")
-    display(read_tsv(RD / f"03_integrate/{ds}/scib_metrics.tsv"))
-    display(read_tsv(RD / f"04_annotate/{ds}/compartment_validation.tsv"))
+    display(read_tsv(RD / f"03_integrate/{ds}/scib_metrics.tsv").round(3))
+    cv = read_tsv(RD / f"04_annotate/{ds}/compartment_validation.tsv")
+    display(cv[[c for c in cv_cols if c in cv.columns]].round(3) if not cv.empty else cv)
 ```
 
 ## Ranked biomarker / target candidates
@@ -71,11 +91,10 @@ compartment-level pseudobulk averages out (e.g. scar-associated endothelium / ma
 scores = read_tsv(RD / "08_score/candidate_scores.tsv")
 sel = scores[scores.get("selected", "").astype(str).str.lower() == "true"] if not scores.empty else scores
 cols = [c for c in ["rank", "gene", "compartment", "composite", "log2FoldChange", "padj",
-                    "de_significant", "in_disease_niche", "niche_padj", "accessibility_class",
-                    "druggability", "repro_score", "rationale"] if c in sel.columns]
+                    "accessibility_class", "druggability", "in_disease_niche"] if c in sel.columns]
 if not sel.empty and "rank" in sel.columns:
     sel = sel.sort_values("rank")
-display(sel[cols] if cols else scores.head(20))
+display(sel[cols].round(3) if cols else scores.head(20))
 ```
 
 ## Known-positive recall (sanity check)
@@ -112,7 +131,9 @@ for ds in DS:
 ## Cross-dataset reproducibility
 
 ```{python}
-display(read_tsv(RD / "09_crossdataset/repro_scores.tsv").head(20))
+rp = read_tsv(RD / "09_crossdataset/repro_scores.tsv")
+rp_cols = ["gene", "compartment", "primary_lfc", "primary_padj", "valid_lfc", "valid_padj", "repro_score"]
+display(rp[[c for c in rp_cols if c in rp.columns]].head(20).round(3) if not rp.empty else rp)
 ```
 
 ## Mechanism: pathways and cell-cell communication
