@@ -169,12 +169,6 @@ Liver Fibrosis}
 \begin{document}
 \maketitle
 
-\renewcommand*\contentsname{Table of contents}
-{
-\setcounter{tocdepth}{3}
-\tableofcontents
-}
-
 \section{Objective}\label{objective}
 
 Discover and prioritize \textbf{cell-type-specific biomarkers and
@@ -184,7 +178,7 @@ GSE244832, MASLD/MASH F0 to F4), focusing on the hepatic
 stellate/myofibroblast, macrophage/monocyte, and endothelial
 compartments.
 
-\section{Approach (one paragraph)}\label{approach-one-paragraph}
+\section{Approach}\label{approach}
 
 A reproducible Snakemake + Scanpy pipeline ingests and QCs the data,
 integrates over donor (not disease) and verifies fibrosis signal is
@@ -239,7 +233,7 @@ mechanistically central in the fibrotic crosstalk). See the full report
 and \texttt{results/08\_score/candidate\_scores.tsv} for the
 per-candidate rationale.
 
-
-
+\textbf{Full report and source code:}
+\url{https://github.com/ericmalekos/sc-liver}
 
 \end{document}

@@ -1,6 +1,7 @@
 ---
 title: "Executive Summary: Cell-Type-Specific Biomarkers in Human Liver Fibrosis"
 date: today
+toc: false
 params:
   results_dir: "results"
 execute:
@@ -32,7 +33,7 @@ liver fibrosis from single-cell transcriptomics (primary: GSE136103, cirrhotic v
 validation: GSE244832, MASLD/MASH F0 to F4), focusing on the hepatic stellate/myofibroblast,
 macrophage/monocyte, and endothelial compartments.
 
-## Approach (one paragraph)
+## Approach
 
 A reproducible Snakemake + Scanpy pipeline ingests and QCs the data, integrates over donor
 (not disease) and verifies fibrosis signal is preserved, annotates and validates the three
@@ -56,3 +57,5 @@ The ranked table flags, per compartment, which candidates are most relevant for 
 (secreted/accessible, reproducible across datasets) versus **therapeutic targeting** (druggable,
 mechanistically central in the fibrotic crosstalk). See the full report and
 `results/08_score/candidate_scores.tsv` for the per-candidate rationale.
+
+**Full report and source code:** <https://github.com/ericmalekos/sc-liver>
