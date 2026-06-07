@@ -19,11 +19,6 @@ single-cell / single-nucleus RNA-seq.
 The pipeline goes **ingest → QC → integrate → annotate → donor-aware DE → pathway/mechanism →
 cell-cell communication → AI/ML biomarker prioritization → ranked 10 to 20 candidates → report**.
 
-> Written answers to the 8 single-cell analysis design questions are in
-> [`docs/written_answers.md`](docs/written_answers.md). The
-> [executive summary](docs/report/exec_summary.pdf) and [full report](docs/report/report.pdf) PDFs
-> are committed under `docs/report/` (the pipeline also renders them to `results/10_report/`).
-
 ---
 
 ## Pipeline
