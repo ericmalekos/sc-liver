@@ -43,6 +43,33 @@ def try_quarto(stem, src, fmt, params):
     return False
 
 
+def tex_to_pdf(stem, src, params, dest):
+    """Quarto's PDF step needs a LaTeX engine on PATH; when the conda report env lacks one,
+    render to .tex and compile with whatever system engine exists (xelatex/pdflatex/lualatex)
+    instead of silently falling back to a placeholder."""
+    engine = next((e for e in ("xelatex", "pdflatex", "lualatex") if shutil.which(e)), None)
+    if not engine:
+        return False
+    srcdir = os.path.dirname(os.path.abspath(src))
+    try:
+        if not os.path.exists(os.path.join(srcdir, f"{stem}.tex")):
+            cmd = ["quarto", "render", os.path.abspath(src), "--to", "latex"]
+            for k, v in params.items():
+                cmd += ["-P", f"{k}:{v}"]
+            subprocess.run(cmd, check=True, capture_output=True, text=True)
+        for _ in range(2):  # 2 passes resolve toc / longtable
+            subprocess.run([engine, "-interaction=nonstopmode", "-halt-on-error", f"{stem}.tex"],
+                           cwd=srcdir, check=True, capture_output=True, text=True)
+        produced = os.path.join(srcdir, f"{stem}.pdf")
+        if os.path.exists(produced):
+            shutil.move(produced, dest)
+            log.info(f"compiled {stem}.pdf via system {engine}")
+            return True
+    except Exception as e:
+        log.warning(f"system-latex compile of {stem} failed: {getattr(e, 'stderr', e)}")
+    return False
+
+
 def fallback_html(stem, dest):
     """self-contained HTML from the key result tables."""
     def tbl(path, n=25):
@@ -82,7 +109,7 @@ for stem, src in qmd.items():
     made.add(html_dest)
     if "pdf" in formats:
         pdf_dest = os.path.join(outdir, f"{stem}.pdf")
-        if not try_quarto(stem, src, "pdf", params):
+        if not (try_quarto(stem, src, "pdf", params) or tex_to_pdf(stem, src, params, pdf_dest)):
             # last-resort: a one-page matplotlib PDF pointer so the target exists
             import matplotlib
 
@@ -91,7 +118,7 @@ for stem, src in qmd.items():
 
             fig = plt.figure(figsize=(8.3, 11.7))
             fig.text(0.1, 0.9, p.title, fontsize=14, weight="bold")
-            fig.text(0.1, 0.8, f"See {stem}.html — PDF toolchain (tinytex) unavailable.", fontsize=10)
+            fig.text(0.1, 0.8, f"See {stem}.html (PDF toolchain unavailable).", fontsize=10)
             fig.savefig(pdf_dest)
             plt.close(fig)
             log.warning(f"wrote placeholder PDF: {pdf_dest}")

@@ -1,6 +1,6 @@
 ---
 title: "Cell-Type-Specific Biomarkers in Human Liver Fibrosis"
-subtitle: "Reproducible single-cell discovery pipeline — full report"
+subtitle: "Reproducible single-cell discovery pipeline, full report"
 date: today
 params:
   results_dir: "results"
@@ -97,7 +97,7 @@ if not rec.empty:
 
 Disease-associated subclusters within each compartment (donor-aware enrichment, valid within a
 sorted compartment); their one-vs-rest markers are the subset biomarkers folded into the ranked
-list above — recovering signals (PLVAP, TREM2, …) that compartment-level pseudobulk buries.
+list above, recovering signals (PLVAP, TREM2, ...) that compartment-level pseudobulk buries.
 
 ```{python}
 for ds in DS:

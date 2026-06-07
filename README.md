@@ -17,8 +17,9 @@ The pipeline goes **ingest → QC → integrate → annotate → donor-aware DE 
 cell-cell communication → AI/ML biomarker prioritization → ranked 10 to 20 candidates → report**.
 
 > Written answers to the 8 single-cell analysis design questions are in
-> [`docs/written_answers.md`](docs/written_answers.md); the 1 to 2 page executive summary is
-> rendered to `results/10_report/exec_summary.pdf`.
+> [`docs/written_answers.md`](docs/written_answers.md). The
+> [executive summary](docs/report/exec_summary.pdf) and [full report](docs/report/report.pdf) PDFs
+> are committed under `docs/report/` (the pipeline also renders them to `results/10_report/`).
 
 ---
 
@@ -70,10 +71,15 @@ buries → `results/05_de/`. *(stellate / myofibroblast, cirrhotic vs healthy, s
 ![DE volcano, stellate](docs/figures/05_de_volcano.png)
 
 ### 6 · Mechanism: pathway / TF activity & cell-cell communication
-decoupler (PROGENy pathways, CollecTRI TFs) + GSEA; LIANA consensus ligand-receptor with
-downstream-target corroboration.
+Each readout maps to a specific tool: **pathway activity** from **PROGENy** (14 canonical signaling
+pathways) and **TF activity** from **CollecTRI**, both scored per cell with **decoupler** and
+aggregated per compartment; **gene-set enrichment** from GSEA + AUCell on a fibrosis core set; and
+**cell-cell communication** from **LIANA** consensus ligand-receptor with downstream-target
+corroboration. The figure below is the **PROGENy** layer specifically: each pathway's activity shift
+in fibrosis (cirrhotic minus healthy) per compartment (e.g. JAK-STAT up in stellate). The TF,
+gene-set, and CCC outputs live in `results/06_pathway/` and `results/07_ccc/`.
 
-![Pathway / TF activity](docs/figures/06_pathway_activity.png)
+![PROGENy pathway-activity shift (decoupler)](docs/figures/06_pathway_activity.png)
 
 ### 7 · Cross-dataset reproducibility
 For each **compartment** (cell-type-matched), the donor-aware DE of the **primary** cohort

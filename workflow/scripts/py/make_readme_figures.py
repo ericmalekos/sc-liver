@@ -111,6 +111,30 @@ for sp in ["top", "right"]:
 fig.savefig(f"{OUT}/05_de_volcano.png", dpi=140, bbox_inches="tight")
 plt.close(fig)
 
+# --- Section 6: PROGENy pathway-activity shift in fibrosis (via decoupler) ---
+act = pd.read_csv(f"results/06_pathway/{PRIMARY}/activity.tsv", sep="\t")
+prog = act[act["level"] == "pathway_progeny"]
+comps6 = sorted(prog["compartment"].unique())
+paths = sorted(prog["source"].unique())
+delta = np.full((len(comps6), len(paths)), np.nan)
+for i, c in enumerate(comps6):
+    for j, pth in enumerate(paths):
+        sub = prog[(prog["compartment"] == c) & (prog["source"] == pth)]
+        ci = sub.loc[sub["condition"] == "cirrhotic", "mean_activity"]
+        he = sub.loc[sub["condition"] == "healthy", "mean_activity"]
+        if len(ci) and len(he):
+            delta[i, j] = ci.mean() - he.mean()
+fig, ax = plt.subplots(figsize=(8.2, 3.0))
+vmax = np.nanmax(np.abs(delta)) or 1.0
+im = ax.imshow(delta, cmap="RdBu_r", vmin=-vmax, vmax=vmax, aspect="auto")
+ax.set_xticks(range(len(paths))); ax.set_xticklabels(paths, rotation=45, ha="right", fontsize=8)
+ax.set_yticks(range(len(comps6))); ax.set_yticklabels(comps6, fontsize=8)
+cb = plt.colorbar(im, ax=ax, fraction=0.02, pad=0.02)
+cb.set_label("activity shift\n(cirrhotic - healthy)", fontsize=7.5); cb.ax.tick_params(labelsize=7)
+ax.set_title("PROGENy pathway-activity shift in fibrosis (decoupler), per compartment", fontsize=10)
+fig.savefig(f"{OUT}/06_pathway_activity.png", dpi=140, bbox_inches="tight")
+plt.close(fig)
+
 # --- Section 7: cross-dataset concordance (per compartment, labeled contrasts) ---
 from scipy.stats import spearmanr  # noqa: E402
 
