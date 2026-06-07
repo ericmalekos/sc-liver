@@ -1,0 +1,6 @@
+# Ruff config, mirrored by CI (.github/workflows/ci.yaml) and .pre-commit-config.yaml.
+# Snakemake injects a `snakemake` object into every workflow script at runtime (so it is not an
+# undefined name, F821), and scripts insert their own dir on sys.path before importing local
+# helpers (so module-level imports legitimately follow code, E402).
+[lint.per-file-ignores]
+"workflow/scripts/py/*.py" = ["F821", "E402"]

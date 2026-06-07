@@ -5,6 +5,7 @@ weights. The headline list takes the top-N per required compartment (so each dis
 compartment is represented) and fills to top-N overall. Output includes every component and a
 one-line rationale per candidate for transparency / explainability.
 """
+
 import os
 import sys
 
@@ -30,9 +31,14 @@ spec_floor = float(p.specificity_ratio_floor)
 feat = pd.read_csv(snakemake.input.features, sep="\t")  # noqa: F821
 shap = pd.read_csv(snakemake.input.shap, sep="\t")  # noqa: F821
 if not shap.empty:
-    feat = feat.merge(shap[["gene", "compartment", "shap_importance"]],
-                      on=["gene", "compartment"], how="left")
-feat["shap_importance"] = feat.get("shap_importance", pd.Series(index=feat.index)).fillna(0.0)
+    feat = feat.merge(
+        shap[["gene", "compartment", "shap_importance"]],
+        on=["gene", "compartment"],
+        how="left",
+    )
+feat["shap_importance"] = feat.get(
+    "shap_importance", pd.Series(index=feat.index)
+).fillna(0.0)
 
 # raw component signals
 feat["padj"] = feat["padj"].fillna(1.0)
@@ -42,7 +48,11 @@ comp_sig = feat["log2FoldChange"].abs() * -np.log10(feat["padj"].clip(lower=1e-3
 # still score on their real biology.
 if "in_disease_niche" in feat.columns:
     nyes = feat["in_disease_niche"].astype(str).str.lower().isin(["true", "1", "1.0"])
-    npadj = pd.to_numeric(feat.get("niche_padj", 1.0), errors="coerce").fillna(1.0).clip(lower=1e-300)
+    npadj = (
+        pd.to_numeric(feat.get("niche_padj", 1.0), errors="coerce")
+        .fillna(1.0)
+        .clip(lower=1e-300)
+    )
     nsig = nyes.astype(float) * feat["niche_lfc"].abs() * -np.log10(npadj)
     feat["de_signal"] = np.maximum(comp_sig, nsig)
 else:
@@ -61,6 +71,7 @@ def minmax_within(df, col):
     def mm(x):
         rng = x.max() - x.min()
         return (x - x.min()) / rng if rng > 0 else pd.Series(0.0, index=x.index)
+
     return df.groupby("compartment")[col].transform(mm)
 
 
@@ -69,11 +80,19 @@ for k, raw in comp_raw.items():
 
 feat["composite"] = sum(W[k] * feat[f"S_{k}"] for k in W)
 
+
 # rationale string
 def rationale(r):
-    bits = [f"{r['direction']} in fibrosis (LFC={r['log2FoldChange']:.2f}, padj={r['padj']:.2g})"]
-    if bool(r.get("in_disease_niche", False)) and float(r.get("niche_padj", 1.0)) < 0.05:
-        bits.append(f"disease-niche (subcluster) marker (padj={float(r['niche_padj']):.1g})")
+    bits = [
+        f"{r['direction']} in fibrosis (LFC={r['log2FoldChange']:.2f}, padj={r['padj']:.2g})"
+    ]
+    if (
+        bool(r.get("in_disease_niche", False))
+        and float(r.get("niche_padj", 1.0)) < 0.05
+    ):
+        bits.append(
+            f"disease-niche (subcluster) marker (padj={float(r['niche_padj']):.1g})"
+        )
     if r["tau"] >= 0.7:
         bits.append(f"{r['home_compartment']}-specific (tau={r['tau']:.2f})")
     if r.get("repro_score", 0) >= 0.6:
@@ -95,13 +114,17 @@ cand = feat[(feat["direction"] == "up") & feat["padj"].notna()].copy()
 # headline list. Specificity/druggability/accessibility must not float a non-DE lineage
 # marker (e.g. padj~1) into the ranked candidates. Every up-regulated gene is still scored
 # and written out (flagged by `de_significant`) for transparency.
-cand["de_significant"] = (cand["padj"] < padj_thr) & (cand["log2FoldChange"].abs() >= lfc_thr)
+cand["de_significant"] = (cand["padj"] < padj_thr) & (
+    cand["log2FoldChange"].abs() >= lfc_thr
+)
 # niche significance: a gene marking a disease-associated subcluster is eligible even when
 # compartment-level pseudobulk DE buries it (subset-level evidence, e.g. PLVAP / TREM2).
 if "in_disease_niche" in cand.columns:
     _nyes = cand["in_disease_niche"].astype(str).str.lower().isin(["true", "1", "1.0"])
     _npadj = pd.to_numeric(cand["niche_padj"], errors="coerce").fillna(1.0)
-    cand["niche_significant"] = _nyes & (_npadj < padj_thr) & (cand["niche_lfc"].abs() >= lfc_thr)
+    cand["niche_significant"] = (
+        _nyes & (_npadj < padj_thr) & (cand["niche_lfc"].abs() >= lfc_thr)
+    )
 else:
     cand["niche_significant"] = False
 cand["eligible"] = cand["de_significant"] | cand["niche_significant"]
@@ -114,7 +137,9 @@ if require_home and "specificity_ratio" in pool.columns:
     pool = pool[pool["specificity_ratio"].astype(float) >= spec_floor]
 elif require_home and "is_home" in pool.columns:  # fallback if ratio column absent
     pool = pool[pool["is_home"].astype(str).str.lower().isin(["true", "1", "1.0"])]
-pool = pool.sort_values(["composite"] + [f"S_{t}" for t in p.tie_breaker], ascending=False)
+pool = pool.sort_values(
+    ["composite"] + [f"S_{t}" for t in p.tie_breaker], ascending=False
+)
 
 # selection: top-N per required compartment, then fill to top-N overall (from eligible pool)
 selected = []
@@ -130,13 +155,38 @@ cand["selected"] = cand.index.isin(sel.index)
 cand = cand.sort_values("composite", ascending=False).reset_index(drop=True)
 cand.loc[cand["selected"], "rank"] = range(1, int(cand["selected"].sum()) + 1)
 
-out_cols = ["rank", "gene", "compartment", "composite", "direction", "log2FoldChange", "padj",
-            "S_de", "S_specificity", "S_reproducibility", "S_druggability", "S_accessibility",
-            "S_ml_shap", "tau", "home_compartment", "is_home", "specificity_ratio",
-            "druggability", "accessibility_class", "repro_score", "de_significant",
-            "in_disease_niche", "niche_padj", "niche_significant", "selected", "rationale"]
+out_cols = [
+    "rank",
+    "gene",
+    "compartment",
+    "composite",
+    "direction",
+    "log2FoldChange",
+    "padj",
+    "S_de",
+    "S_specificity",
+    "S_reproducibility",
+    "S_druggability",
+    "S_accessibility",
+    "S_ml_shap",
+    "tau",
+    "home_compartment",
+    "is_home",
+    "specificity_ratio",
+    "druggability",
+    "accessibility_class",
+    "repro_score",
+    "de_significant",
+    "in_disease_niche",
+    "niche_padj",
+    "niche_significant",
+    "selected",
+    "rationale",
+]
 ensure_parent(snakemake.output.scores)  # noqa: F821
-cand[[c for c in out_cols if c in cand.columns]].to_csv(snakemake.output.scores, sep="\t", index=False)  # noqa: F821
+cand[[c for c in out_cols if c in cand.columns]].to_csv(
+    snakemake.output.scores, sep="\t", index=False
+)  # noqa: F821
 
 # figure: top selected candidates
 ensure_parent(snakemake.output.fig)  # noqa: F821
@@ -145,14 +195,20 @@ fig, ax = plt.subplots(figsize=(7, max(3, 0.32 * len(top))))
 if not top.empty:
     comps = sorted(top["compartment"].unique())
     cmap = {c: plt.cm.tab10(i) for i, c in enumerate(comps)}
-    ax.barh(top["gene"] + " (" + top["compartment"].str[:4] + ")", top["composite"],
-            color=[cmap[c] for c in top["compartment"]])
+    ax.barh(
+        top["gene"] + " (" + top["compartment"].str[:4] + ")",
+        top["composite"],
+        color=[cmap[c] for c in top["compartment"]],
+    )
     ax.set_xlabel("composite score")
     ax.set_title("Top prioritized biomarker / target candidates")
 else:
     ax.text(0.5, 0.5, "no candidates", ha="center")
-fig.tight_layout(); fig.savefig(snakemake.output.fig, dpi=120)  # noqa: F821
+fig.tight_layout()
+fig.savefig(snakemake.output.fig, dpi=120)  # noqa: F821
 
 n_sel = int(cand["selected"].sum())
-log.info(f"scored {len(cand)} up-regulated candidates; selected top {n_sel} "
-         f"(per-compartment {dict(top['compartment'].value_counts())})")
+log.info(
+    f"scored {len(cand)} up-regulated candidates; selected top {n_sel} "
+    f"(per-compartment {dict(top['compartment'].value_counts())})"
+)

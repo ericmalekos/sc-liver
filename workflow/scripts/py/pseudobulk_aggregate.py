@@ -5,6 +5,7 @@ pseudoreplication-inflated false discoveries (Squair 2021). Donors with fewer th
 `min_cells_per_donor` cells in this compartment are dropped. Emits a genes x donors
 count matrix and a donor-level coldata table for the R DE step.
 """
+
 import os
 import sys
 
@@ -33,7 +34,9 @@ for donor, idx in sub.obs.groupby("donor_id").indices.items():
     if len(idx) < min_cells:
         continue
     block = counts[idx]
-    vec = np.asarray(block.sum(axis=0)).ravel() if hasattr(block, "sum") else block.sum(0)
+    vec = (
+        np.asarray(block.sum(axis=0)).ravel() if hasattr(block, "sum") else block.sum(0)
+    )
     if agg == "mean":
         vec = vec / len(idx)
     cols[donor] = np.rint(vec).astype(int)
@@ -57,13 +60,25 @@ if cols:
     coldata = pd.DataFrame(coldata_rows).set_index("sample").loc[counts_df.columns]
 else:
     counts_df = pd.DataFrame(index=genes)
-    coldata = pd.DataFrame(columns=["donor_id", "condition", "fibrosis_axis",
-                                    "fibrosis_bin", "sort_gate", "n_cells"])
-    log.warning(f"[{comp}] no donors passed min_cells={min_cells}; writing empty pseudobulk")
+    coldata = pd.DataFrame(
+        columns=[
+            "donor_id",
+            "condition",
+            "fibrosis_axis",
+            "fibrosis_bin",
+            "sort_gate",
+            "n_cells",
+        ]
+    )
+    log.warning(
+        f"[{comp}] no donors passed min_cells={min_cells}; writing empty pseudobulk"
+    )
 
 counts_df.index.name = "gene"
 counts_df.to_csv(snakemake.output.counts, sep="\t")  # noqa: F821
 coldata.index.name = "sample"
 coldata.to_csv(snakemake.output.coldata, sep="\t")  # noqa: F821
-log.info(f"[{comp}] pseudobulk: {counts_df.shape[1]} donors x {counts_df.shape[0]} genes; "
-         f"groups={coldata['condition'].value_counts().to_dict() if not coldata.empty else {}}")
+log.info(
+    f"[{comp}] pseudobulk: {counts_df.shape[1]} donors x {counts_df.shape[0]} genes; "
+    f"groups={coldata['condition'].value_counts().to_dict() if not coldata.empty else {}}"
+)

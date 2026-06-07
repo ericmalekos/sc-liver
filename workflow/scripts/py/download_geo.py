@@ -5,6 +5,7 @@ GEO RAW tarballs ship per-GSM files with mixed naming; this groups them by GSM a
 and normalizes filenames to barcodes/features/matrix. Heuristic by design — verify the
 layout for a new dataset and adjust the regexes if needed. Not exercised by the fixture.
 """
+
 import hashlib
 import os
 import re
@@ -71,5 +72,7 @@ for f in list(outdir.glob("*")):
     moved += 1
 
 n_samples = sum(1 for d in outdir.iterdir() if d.is_dir())
-sentinel.write_text(f"accession={accession}\nsamples={n_samples}\nfiles_organized={moved}\n")
+sentinel.write_text(
+    f"accession={accession}\nsamples={n_samples}\nfiles_organized={moved}\n"
+)
 log.info(f"Organized {moved} files into {n_samples} sample dirs under {outdir}")

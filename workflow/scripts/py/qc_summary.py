@@ -1,4 +1,5 @@
 """Stage 02 — collate per-sample QC metrics into one dataset-level summary table."""
+
 import json
 import os
 import sys
@@ -21,6 +22,8 @@ for jf in snakemake.input.metrics:  # noqa: F821
 df = pd.DataFrame(rows).sort_values("sample")
 ensure_parent(snakemake.output.tsv)  # noqa: F821
 df.to_csv(snakemake.output.tsv, sep="\t", index=False)  # noqa: F821
-log.info(f"QC summary: {len(df)} samples, "
-         f"{df['n_cells_after'].sum()} cells retained "
-         f"(median {df['pct_kept'].median():.0f}% kept)")
+log.info(
+    f"QC summary: {len(df)} samples, "
+    f"{df['n_cells_after'].sum()} cells retained "
+    f"(median {df['pct_kept'].median():.0f}% kept)"
+)

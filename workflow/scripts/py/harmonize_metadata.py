@@ -5,6 +5,7 @@ F2+/low split, records cell counts, and keeps the original label for provenance.
 The axis itself is mapped from heterogeneous source labels by make_samplesheet.py via
 config.metadata.fibrosis_mapping; here we validate, derive the binary split, and emit.
 """
+
 import os
 import sys
 

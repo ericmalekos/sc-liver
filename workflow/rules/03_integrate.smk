@@ -22,7 +22,12 @@ rule integrate:
         "logs/03_integrate/{ds}.log",
     threads: 8
     conda:
-        env("integrate_gpu.yaml") if config["gpu"]["enabled"] and config["integration"]["method"] in ("scvi", "scanvi") else env("integrate_cpu.yaml")
+        (
+            env("integrate_gpu.yaml")
+            if config["gpu"]["enabled"]
+            and config["integration"]["method"] in ("scvi", "scanvi")
+            else env("integrate_cpu.yaml")
+        )
     script:
         script_py("integrate.py")
 

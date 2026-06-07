@@ -5,6 +5,7 @@ Python reads the .h5ad and writes counts as a MatrixMarket file; a small R scrip
 (decontx_run.R) runs decontX and writes corrected counts back; Python loads them and writes
 the .ambient.h5ad. Falls back to passthrough on any failure so the pipeline never stalls.
 """
+
 import os
 import subprocess
 import sys
@@ -31,22 +32,27 @@ def quick_clusters(counts_cells_x_genes, n_top=2000, n_pcs=30, k=15, seed=0):
     a population's genuine marker genes (e.g. SPP1 in scar macrophages); its default self-
     clustering otherwise over-corrects high-expressed markers."""
     from scipy.cluster.vq import kmeans2
-    X = sp.csr_matrix(counts_cells_x_genes).astype(float)          # cells x genes
+
+    X = sp.csr_matrix(counts_cells_x_genes).astype(float)  # cells x genes
     if X.shape[0] < 6:
         return np.ones(X.shape[0], dtype=int)
-    lib = np.asarray(X.sum(1)).ravel(); lib[lib == 0] = 1.0
-    Xn = X.multiply(1e4 / lib[:, None]).tocsr(); Xn.data = np.log1p(Xn.data)
+    lib = np.asarray(X.sum(1)).ravel()
+    lib[lib == 0] = 1.0
+    Xn = X.multiply(1e4 / lib[:, None]).tocsr()
+    Xn.data = np.log1p(Xn.data)
     mean = np.asarray(Xn.mean(0)).ravel()
-    var = np.asarray(Xn.multiply(Xn).mean(0)).ravel() - mean ** 2
-    top = np.argsort(var)[::-1][:min(n_top, Xn.shape[1])]
-    D = np.asarray(Xn[:, top].todense()); D -= D.mean(0)
+    var = np.asarray(Xn.multiply(Xn).mean(0)).ravel() - mean**2
+    top = np.argsort(var)[::-1][: min(n_top, Xn.shape[1])]
+    D = np.asarray(Xn[:, top].todense())
+    D -= D.mean(0)
     npc = int(min(n_pcs, D.shape[1] - 1, D.shape[0] - 1))
     U, S, _ = np.linalg.svd(D, full_matrices=False)
     scores = U[:, :npc] * S[:npc]
     kk = int(max(2, min(k, D.shape[0] // 50)))
     _, labels = kmeans2(scores, kk, seed=seed, minit="++", missing="warn")
-    _, labels = np.unique(labels, return_inverse=True)   # contiguous
-    return labels.astype(int) + 1                        # 1-based for R
+    _, labels = np.unique(labels, return_inverse=True)  # contiguous
+    return labels.astype(int) + 1  # 1-based for R
+
 
 genes_x_cells = sp.csr_matrix(counts).T.tocsc()  # decontX wants genes x cells
 
@@ -60,11 +66,17 @@ with tempfile.TemporaryDirectory() as tmp:
     try:
         z = quick_clusters(counts)
         np.savetxt(z_file, z, fmt="%d")
-        log.info(f"decontX cluster priors: {len(np.unique(z))} clusters over {len(z)} cells")
+        log.info(
+            f"decontX cluster priors: {len(np.unique(z))} clusters over {len(z)} cells"
+        )
     except Exception as e:
         z_file = ""
-        log.warning(f"cluster-prior computation failed ({e}); decontX will self-cluster")
-    rscript = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "R", "decontx_run.R")
+        log.warning(
+            f"cluster-prior computation failed ({e}); decontX will self-cluster"
+        )
+    rscript = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "..", "R", "decontx_run.R"
+    )
     cmd = ["Rscript", rscript, mtx_in, out_prefix] + ([z_file] if z_file else [])
     res = subprocess.run(cmd, capture_output=True, text=True)
     log.info((res.stdout or "")[-1500:])
@@ -77,7 +89,9 @@ with tempfile.TemporaryDirectory() as tmp:
         adata.obs["ambient_fraction"] = np.asarray(cont, dtype=float).ravel()
         ok = True
     else:
-        log.warning(f"decontX failed; passing counts through. stderr: {(res.stderr or '')[-800:]}")
+        log.warning(
+            f"decontX failed; passing counts through. stderr: {(res.stderr or '')[-800:]}"
+        )
         adata.obs["ambient_fraction"] = 0.0
 
 adata.uns["ambient_method"] = method if ok else f"{method}_failed_passthrough"

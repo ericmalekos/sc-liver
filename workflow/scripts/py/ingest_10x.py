@@ -5,6 +5,7 @@ Reads the MEX triplet directly (scipy/pandas) rather than via scanpy.read_10x_mt
 which makes it robust to 10x v2 (genes.tsv, 2 cols) vs v3 (features.tsv, 3 cols) and
 to scanpy's format auto-detection quirks. Gzipped or plain files both work.
 """
+
 import gzip
 import os
 import sys
@@ -13,7 +14,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _utils import get_logger, write_h5ad  # noqa: E402
 
 import anndata as ad  # noqa: E402
-import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 import scipy.io  # noqa: E402
 import scipy.sparse as sp  # noqa: E402
@@ -41,7 +41,7 @@ feat_p = find("features.tsv.gz", "features.tsv", "genes.tsv.gz", "genes.tsv")
 bc_p = find("barcodes.tsv.gz", "barcodes.tsv")
 
 log.info(f"Ingesting {meta.get('sample_id')} from {data_path}")
-with (gzip.open(mtx_p, "rb") if mtx_p.endswith(".gz") else open(mtx_p, "rb")) as fh:
+with gzip.open(mtx_p, "rb") if mtx_p.endswith(".gz") else open(mtx_p, "rb") as fh:
     M = scipy.io.mmread(fh).tocsr()  # features x cells (10x convention)
 X = sp.csr_matrix(M.T)  # cells x features
 
@@ -54,15 +54,27 @@ var = pd.DataFrame({"gene_ids": gene_ids}, index=pd.Index(gene_sym, name=None))
 adata = ad.AnnData(X=X, obs=pd.DataFrame(index=barcodes), var=var)
 adata.var_names_make_unique()
 
-for key in ["sample_id", "dataset", "condition", "fibrosis_stage_raw",
-            "fibrosis_axis", "sort_gate", "modality", "donor_id"]:
+for key in [
+    "sample_id",
+    "dataset",
+    "condition",
+    "fibrosis_stage_raw",
+    "fibrosis_axis",
+    "sort_gate",
+    "modality",
+    "donor_id",
+]:
     if key in meta and meta[key] is not None:
         adata.obs[key] = int(meta[key]) if key == "fibrosis_axis" else str(meta[key])
 
 adata.obs_names = [f"{meta['sample_id']}::{bc}" for bc in adata.obs_names]
 adata.layers["counts"] = adata.X.copy()
-adata.var["mt"] = pd.Index(adata.var_names).str.upper().str.startswith(("MT-", "MT.", "MTRNR"))
+adata.var["mt"] = (
+    pd.Index(adata.var_names).str.upper().str.startswith(("MT-", "MT.", "MTRNR"))
+)
 
-log.info(f"Loaded {adata.n_obs} cells x {adata.n_vars} genes "
-         f"(features file: {os.path.basename(feat_p)}, {feat.shape[1]} cols)")
+log.info(
+    f"Loaded {adata.n_obs} cells x {adata.n_vars} genes "
+    f"(features file: {os.path.basename(feat_p)}, {feat.shape[1]} cols)"
+)
 write_h5ad(adata, out)

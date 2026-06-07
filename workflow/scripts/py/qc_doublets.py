@@ -3,13 +3,20 @@
 Robust to tiny inputs: if Scrublet can't fit a threshold (small fixture data), it falls
 back to zero scores so the QC filter simply keeps all cells.
 """
+
 import os
 
 # Pin BLAS/OpenMP to single-threaded BEFORE numpy is imported. On the 256-core compute
 # nodes, OpenBLAS otherwise spawns ~256 threads per process; running many Scrublet jobs in
 # parallel then explodes the thread count and segfaults (the original empty-log crashes).
-for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
-           "NUMBA_NUM_THREADS", "VECLIB_MAXIMUM_THREADS", "NUMEXPR_NUM_THREADS"):
+for _v in (
+    "OMP_NUM_THREADS",
+    "OPENBLAS_NUM_THREADS",
+    "MKL_NUM_THREADS",
+    "NUMBA_NUM_THREADS",
+    "VECLIB_MAXIMUM_THREADS",
+    "NUMEXPR_NUM_THREADS",
+):
     os.environ.setdefault(_v, "1")
 
 import sys

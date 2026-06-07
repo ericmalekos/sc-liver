@@ -4,6 +4,7 @@ Runs LIANA's rank-aggregate consensus over compartments, SEPARATELY per conditio
 next step can compute condition-differential communication. Applies an expression-proportion
 filter (a first overinterpretation guard). Degrades to a header-only table if LIANA fails.
 """
+
 import os
 import sys
 
@@ -35,8 +36,9 @@ def run_one(ad_sub, label):
     ad_sub = ad_sub[ad_sub.obs[groupby].isin(keep)].copy()
     if ad_sub.obs[groupby].nunique() < 2:
         return None
-    li.mt.rank_aggregate(ad_sub, groupby=groupby, expr_prop=expr_prop,
-                         use_raw=False, verbose=False)
+    li.mt.rank_aggregate(
+        ad_sub, groupby=groupby, expr_prop=expr_prop, use_raw=False, verbose=False
+    )
     res = ad_sub.uns["liana_res"].copy()
     res["condition"] = label
     return res
@@ -56,8 +58,15 @@ try:
 except Exception as e:
     log.warning(f"LIANA failed: {e}")
 
-cols = ["source", "target", "ligand_complex", "receptor_complex",
-        "specificity_rank", "magnitude_rank", "condition"]
+cols = [
+    "source",
+    "target",
+    "ligand_complex",
+    "receptor_complex",
+    "specificity_rank",
+    "magnitude_rank",
+    "condition",
+]
 if frames:
     res = pd.concat(frames, ignore_index=True)
     keep_cols = [c for c in cols if c in res.columns]

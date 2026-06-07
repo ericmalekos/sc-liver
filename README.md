@@ -1,5 +1,7 @@
 # Cell-Type-Specific Biomarker Discovery in Human Liver Fibrosis
 
+[![lint](https://github.com/ericmalekos/sc-liver/actions/workflows/lint.yaml/badge.svg)](https://github.com/ericmalekos/sc-liver/actions/workflows/lint.yaml)
+
 A reproducible, modular **Snakemake + Scanpy** pipeline that discovers and prioritizes
 **cell-type-specific biomarkers and therapeutic targets** in human liver fibrosis from
 single-cell / single-nucleus RNA-seq.

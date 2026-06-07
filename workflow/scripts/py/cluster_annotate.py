@@ -4,14 +4,13 @@ Scores each curated cell-type signature per cell, assigns every Leiden cluster t
 best-scoring cell type, and writes a marker dotplot. Final compartment assignment and
 validation happen in celltypist_annotate.py.
 """
+
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _utils import get_logger, set_all_seeds, use_agg, write_h5ad  # noqa: E402
 
-import numpy as np  # noqa: E402
-import pandas as pd  # noqa: E402
 import scanpy as sc  # noqa: E402
 import yaml  # noqa: E402
 
@@ -49,7 +48,9 @@ cluster_label = {}
 for cl, row in per_cluster.iterrows():
     best = row.idxmax()
     cluster_label[cl] = best.replace("score_", "")
-adata.obs["cell_type_marker"] = adata.obs["leiden"].map(cluster_label).astype("category")
+adata.obs["cell_type_marker"] = (
+    adata.obs["leiden"].map(cluster_label).astype("category")
+)
 log.info(f"Cluster->cell_type: {cluster_label}")
 
 # marker dotplot (a few canonical markers per major type)
@@ -65,7 +66,8 @@ try:
     plt.close("all")
 except Exception as e:
     log.warning(f"dotplot failed, writing placeholder: {e}")
-    plt.figure(); plt.text(0.5, 0.5, "dotplot unavailable", ha="center")
+    plt.figure()
+    plt.text(0.5, 0.5, "dotplot unavailable", ha="center")
     plt.savefig(snakemake.output.dotplot, dpi=90)  # noqa: F821
 
 write_h5ad(adata, snakemake.output.h5ad)  # noqa: F821

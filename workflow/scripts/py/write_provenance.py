@@ -1,4 +1,5 @@
 """Provenance — capture the resolved config, git SHA, and tool versions for the run."""
+
 import json
 import os
 import subprocess
@@ -16,7 +17,9 @@ config = dict(snakemake.params.config)  # noqa: F821
 
 def sh(cmd):
     try:
-        return subprocess.check_output(cmd, shell=True, text=True, stderr=subprocess.DEVNULL).strip()
+        return subprocess.check_output(
+            cmd, shell=True, text=True, stderr=subprocess.DEVNULL
+        ).strip()
     except Exception:
         return None
 
@@ -30,7 +33,9 @@ meta = {
     "conda": sh("conda --version"),
     "host": sh("hostname"),
     "project": config.get("project", {}),
-    "datasets": {k: v.get("geo_accession") for k, v in config.get("datasets", {}).items()},
+    "datasets": {
+        k: v.get("geo_accession") for k, v in config.get("datasets", {}).items()
+    },
     "integration_method": config.get("integration", {}).get("method"),
     "de_engine": config.get("de", {}).get("engine"),
     "score_weights": config.get("score", {}).get("weights"),

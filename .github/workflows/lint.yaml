@@ -1,0 +1,18 @@
+name: lint
+on: [push, pull_request]
+
+jobs:
+  lint:
+    name: Lint (snakefmt / black / ruff / yaml / schema)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - run: pip install snakefmt==0.10.2 black==24.4.2 ruff==0.4.8 yamllint==1.35.1 snakemake-minimal==7.28.3 jsonschema pyyaml
+      - run: snakefmt --check workflow/
+      - run: black --check workflow/scripts/py
+      - run: ruff check workflow/scripts/py
+      - run: yamllint -d relaxed config envs profiles .github
+      - name: Validate config against schema
+        run: python .github/scripts/validate_config.py config/config.yaml config/schemas/config.schema.yaml

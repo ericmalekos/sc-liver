@@ -10,6 +10,7 @@ Metrics (interpretable, sklearn-based; optional iLISI/cLISI if scib-metrics pres
   * condition_knn_accuracy  : 5-fold CV accuracy predicting condition from the embedding
                               (>> chance => fibrosis signal retained)
 """
+
 import os
 import sys
 
@@ -52,22 +53,27 @@ if "condition" in adata.obs and adata.obs["condition"].nunique() >= 2:
     rows["condition_silhouette"] = safe_sil(adata.obs["condition"])
     try:
         y = adata.obs["condition"].astype("category").cat.codes.values
-        cond_auc = float(np.mean(cross_val_score(
-            KNeighborsClassifier(15), emb, y, cv=min(5, np.bincount(y).min()))))
+        cond_auc = float(
+            np.mean(
+                cross_val_score(
+                    KNeighborsClassifier(15), emb, y, cv=min(5, np.bincount(y).min())
+                )
+            )
+        )
     except Exception as e:
         log.warning(f"condition kNN CV skipped: {e}")
     rows["condition_knn_accuracy"] = cond_auc
     # signal preserved if condition is separable above chance
     chance = float(pd.Series(adata.obs["condition"]).value_counts(normalize=True).max())
-    guard_pass = bool((cond_auc if cond_auc == cond_auc else 0) > chance + 0.05
-                      or (rows.get("condition_silhouette", -1) or -1) > 0)
+    guard_pass = bool(
+        (cond_auc if cond_auc == cond_auc else 0) > chance + 0.05
+        or (rows.get("condition_silhouette", -1) or -1) > 0
+    )
 rows["fibrosis_signal_guard_pass"] = guard_pass
 
 # optional LISI from scib-metrics
 try:
     from scib_metrics import ilisi_knn
-
-    import scipy.sparse as sp
 
     knn = adata.obsp["distances"]
     rows["ilisi"] = float(ilisi_knn(knn, adata.obs[batch_key].values))
@@ -80,8 +86,16 @@ df.to_csv(snakemake.output.tsv, sep="\t", index=False)  # noqa: F821
 
 # small bar figure
 ensure_parent(snakemake.output.fig)  # noqa: F821
-plot_keys = [k for k in ["batch_silhouette", "condition_silhouette",
-                         "condition_knn_accuracy", "ilisi"] if k in rows and rows[k] == rows[k]]
+plot_keys = [
+    k
+    for k in [
+        "batch_silhouette",
+        "condition_silhouette",
+        "condition_knn_accuracy",
+        "ilisi",
+    ]
+    if k in rows and rows[k] == rows[k]
+]
 fig, ax = plt.subplots(figsize=(5, 3))
 ax.bar(plot_keys, [rows[k] for k in plot_keys])
 ax.set_title("Integration metrics")

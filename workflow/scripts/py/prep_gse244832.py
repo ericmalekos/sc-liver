@@ -13,13 +13,11 @@ Run once after downloading GSE244832_hLIVER_processed_files.tar.gz:
 """
 import csv
 import gzip
-import os
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import scipy.io
-import scipy.sparse as sp
 
 REPO = Path(__file__).resolve().parents[3]
 SRC = REPO / "results/00_download/gse244832/processed_files"
@@ -44,7 +42,10 @@ def main():
     stream = gzip.open(mtx_path, "rb") if is_gz else open(mtx_path, "rb")
     M = scipy.io.mmread(stream).tocsc()  # genes x cells
     stream.close()
-    assert M.shape == (len(genes), len(meta)), f"shape {M.shape} != ({len(genes)},{len(meta)})"
+    assert M.shape == (
+        len(genes),
+        len(meta),
+    ), f"shape {M.shape} != ({len(genes)},{len(meta)})"
 
     rows = []
     for sid in sorted(samples.unique()):
@@ -63,11 +64,19 @@ def main():
         with gzip.open(d / "barcodes.tsv.gz", "wt", newline="") as fh:
             for c in cols:
                 fh.write(barcodes[c] + "\n")
-        rows.append(dict(
-            sample_id=sid, dataset="gse244832", condition=COND.get(cond_raw.upper(), cond_raw),
-            fibrosis_stage_raw=cond_raw, fibrosis_axis=axis, sort_gate="total",
-            modality="snRNA", donor_id=sid, data_path=f"results/00_download/gse244832/raw/{sid}",
-        ))
+        rows.append(
+            dict(
+                sample_id=sid,
+                dataset="gse244832",
+                condition=COND.get(cond_raw.upper(), cond_raw),
+                fibrosis_stage_raw=cond_raw,
+                fibrosis_axis=axis,
+                sort_gate="total",
+                modality="snRNA",
+                donor_id=sid,
+                data_path=f"results/00_download/gse244832/raw/{sid}",
+            )
+        )
         print(f"  {sid}: {cond_raw}->axis{axis}, {len(cols)} cells")
 
     df = pd.DataFrame(rows)

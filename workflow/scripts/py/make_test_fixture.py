@@ -48,20 +48,48 @@ def load_gmt_genes() -> list[str]:
 
 # extra ligand/receptor genes so LIANA recovers the fibrotic crosstalk
 LR_EXTRA = [
-    "TGFB1", "TGFBR1", "TGFBR2", "PDGFB", "PDGFRB", "SPP1", "CD44", "ITGAV",
-    "TNFSF12", "TNFRSF12A", "JAG1", "DLL4", "NOTCH3", "CCL2", "CCR2", "IL1B", "IL1R1",
+    "TGFB1",
+    "TGFBR1",
+    "TGFBR2",
+    "PDGFB",
+    "PDGFRB",
+    "SPP1",
+    "CD44",
+    "ITGAV",
+    "TNFSF12",
+    "TNFRSF12A",
+    "JAG1",
+    "DLL4",
+    "NOTCH3",
+    "CCL2",
+    "CCR2",
+    "IL1B",
+    "IL1R1",
 ]
 
 # per-condition cell-type composition (healthy/low vs fibrotic/high)
 COMP_HEALTHY = {
-    "Hepatocyte": 0.40, "LSEC": 0.15, "Kupffer_resident": 0.12, "Endothelial_vasc": 0.05,
-    "HSC_mesenchyme": 0.05, "Cholangiocyte": 0.05, "T_NK": 0.11, "B_plasma": 0.03,
+    "Hepatocyte": 0.40,
+    "LSEC": 0.15,
+    "Kupffer_resident": 0.12,
+    "Endothelial_vasc": 0.05,
+    "HSC_mesenchyme": 0.05,
+    "Cholangiocyte": 0.05,
+    "T_NK": 0.11,
+    "B_plasma": 0.03,
     "Monocyte_MoMac": 0.04,
 }
 COMP_FIBROTIC = {
-    "Hepatocyte": 0.20, "LSEC": 0.08, "Endothelial_vasc": 0.11, "Kupffer_resident": 0.08,
-    "Monocyte_MoMac": 0.15, "HSC_mesenchyme": 0.15, "Portal_fibroblast": 0.05,
-    "Cholangiocyte": 0.08, "T_NK": 0.07, "B_plasma": 0.03,
+    "Hepatocyte": 0.20,
+    "LSEC": 0.08,
+    "Endothelial_vasc": 0.11,
+    "Kupffer_resident": 0.08,
+    "Monocyte_MoMac": 0.15,
+    "HSC_mesenchyme": 0.15,
+    "Portal_fibroblast": 0.05,
+    "Cholangiocyte": 0.08,
+    "T_NK": 0.07,
+    "B_plasma": 0.03,
 }
 
 # which disease-state signature switches on, by cell type, in fibrotic samples
@@ -102,7 +130,9 @@ def simulate_sample(sample_id, axis, modality, rng, gene_index, ct_markers, ds_m
     probs /= probs.sum()
     assignments = rng.choice(types, size=n_cells, p=probs)
 
-    X = rng.poisson(0.15, size=(n_cells, n_genes)).astype(np.float32)  # ambient-ish baseline
+    X = rng.poisson(0.15, size=(n_cells, n_genes)).astype(
+        np.float32
+    )  # ambient-ish baseline
     cell_types = []
     for i, ct in enumerate(assignments):
         cell_types.append(ct)
@@ -124,7 +154,9 @@ def simulate_sample(sample_id, axis, modality, rng, gene_index, ct_markers, ds_m
     return sp.csr_matrix(X), cell_types
 
 
-def write_10x(outdir: Path, mat_genes_x_cells: sp.spmatrix, genes: list[str], barcodes: list[str]):
+def write_10x(
+    outdir: Path, mat_genes_x_cells: sp.spmatrix, genes: list[str], barcodes: list[str]
+):
     outdir.mkdir(parents=True, exist_ok=True)
     with gzip.open(outdir / "matrix.mtx.gz", "wb") as fh:
         scipy.io.mmwrite(fh, mat_genes_x_cells, field="integer")
@@ -151,13 +183,20 @@ def main() -> int:
         sample_id = row["sample_id"]
         rng = np.random.default_rng(SEED + abs(hash(sample_id)) % 100000)
         mat_cells_x_genes, _cts = simulate_sample(
-            sample_id, int(row["fibrosis_axis"]), row["modality"], rng,
-            gene_index, ct_markers, ds_markers,
+            sample_id,
+            int(row["fibrosis_axis"]),
+            row["modality"],
+            rng,
+            gene_index,
+            ct_markers,
+            ds_markers,
         )
         barcodes = [f"{sample_id}_{i:04d}-1" for i in range(mat_cells_x_genes.shape[0])]
         # 10x convention: features x barcodes
         write_10x(REPO / row["data_path"], mat_cells_x_genes.T.tocsr(), genes, barcodes)
-        print(f"  wrote {row['data_path']}: {mat_cells_x_genes.shape[0]} cells x {len(genes)} genes")
+        print(
+            f"  wrote {row['data_path']}: {mat_cells_x_genes.shape[0]} cells x {len(genes)} genes"
+        )
     print(f"Fixture written for {len(sheet)} samples; {len(genes)} genes.")
     return 0
 

@@ -3,6 +3,7 @@
 Used via Snakemake's `script:` directive, which injects a global `snakemake`
 object. Keep this import-safe (no side effects at import time).
 """
+
 from __future__ import annotations
 
 import logging

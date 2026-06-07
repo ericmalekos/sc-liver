@@ -10,12 +10,19 @@ stressed/diseased cells:
     scar-associated macrophages, etc. survive.
 Writes a metrics JSON and a before/after figure.
 """
+
 import json
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _utils import ensure_parent, get_logger, read_h5ad, use_agg, write_h5ad  # noqa: E402
+from _utils import (
+    ensure_parent,
+    get_logger,
+    read_h5ad,
+    use_agg,
+    write_h5ad,
+)  # noqa: E402
 
 import numpy as np  # noqa: E402
 import scanpy as sc  # noqa: E402
@@ -26,7 +33,11 @@ import matplotlib.pyplot as plt  # noqa: E402
 log = get_logger(snakemake)  # noqa: F821
 p = snakemake.params  # noqa: F821
 modality = p.modality
-mito_max = float(p.mito_pct_max[modality]) if isinstance(p.mito_pct_max, dict) else float(p.mito_pct_max)
+mito_max = (
+    float(p.mito_pct_max[modality])
+    if isinstance(p.mito_pct_max, dict)
+    else float(p.mito_pct_max)
+)
 n_mads = float(p.n_mads)
 
 adata = read_h5ad(snakemake.input.h5ad)  # noqa: F821
@@ -52,8 +63,10 @@ mt_ceiling = min(mito_max, mt_hi) if np.isfinite(mt_hi) else mito_max
 logc = np.log1p(adata.obs["total_counts"].values)
 logg = np.log1p(adata.obs["n_genes_by_counts"].values)
 keep = (
-    (logc >= lc_lo) & (logc <= lc_hi)
-    & (logg >= lg_lo) & (logg <= lg_hi)
+    (logc >= lc_lo)
+    & (logc <= lc_hi)
+    & (logg >= lg_lo)
+    & (logg <= lg_hi)
     & (adata.obs["pct_counts_mt"].values <= mt_ceiling)
     & (adata.obs["total_counts"].values >= float(p.min_counts))
     & (adata.obs["n_genes_by_counts"].values >= float(p.min_genes))
@@ -106,5 +119,7 @@ fig.tight_layout()
 fig.savefig(snakemake.output.fig, dpi=110)  # noqa: F821
 
 write_h5ad(adata_f, snakemake.output.h5ad)  # noqa: F821
-log.info(f"QC {metrics['sample']}: {n_before}->{n_after} cells "
-         f"(MAD removed {n_mad_removed}, mito ceiling {mt_ceiling:.1f}%)")
+log.info(
+    f"QC {metrics['sample']}: {n_before}->{n_after} cells "
+    f"(MAD removed {n_mad_removed}, mito ceiling {mt_ceiling:.1f}%)"
+)

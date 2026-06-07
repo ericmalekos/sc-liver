@@ -5,6 +5,7 @@ Default method is Harmony (CPU). scVI/scANVI is used only when gpu.enabled. Full
 set is retained (counts layer kept) so downstream pseudobulk DE uses all genes; PCA is
 computed on HVGs only.
 """
+
 import os
 import sys
 
@@ -12,7 +13,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _utils import get_logger, set_all_seeds, use_agg, write_h5ad  # noqa: E402
 
 import anndata as ad  # noqa: E402
-import numpy as np  # noqa: E402
 import scanpy as sc  # noqa: E402
 
 use_agg()
@@ -34,8 +34,10 @@ adatas = [sc.read_h5ad(f) for f in snakemake.input.h5ads]  # noqa: F821
 adata = ad.concat(adatas, join="outer", fill_value=0, index_unique=None, merge="same")
 adata.obs_names_make_unique()
 adata.layers["counts"] = adata.layers.get("counts", adata.X).copy()
-log.info(f"Concatenated {len(adatas)} samples -> {adata.n_obs} cells x {adata.n_vars} genes; "
-         f"batches({batch_key})={adata.obs[batch_key].nunique()}")
+log.info(
+    f"Concatenated {len(adatas)} samples -> {adata.n_obs} cells x {adata.n_vars} genes; "
+    f"batches({batch_key})={adata.obs[batch_key].nunique()}"
+)
 
 # normalize / log1p on the full gene set
 adata.X = adata.layers["counts"].copy()
@@ -44,10 +46,18 @@ sc.pp.log1p(adata)
 adata.layers["lognorm"] = adata.X.copy()
 
 n_hvg = min(n_hvg, adata.n_vars)
-sc.pp.highly_variable_genes(adata, n_top_genes=n_hvg, flavor="seurat_v3",
-                            layer="counts", batch_key=batch_key, subset=False)
+sc.pp.highly_variable_genes(
+    adata,
+    n_top_genes=n_hvg,
+    flavor="seurat_v3",
+    layer="counts",
+    batch_key=batch_key,
+    subset=False,
+)
 
-n_pcs = int(min(int(p.n_latent), adata.var["highly_variable"].sum() - 1, adata.n_obs - 1))
+n_pcs = int(
+    min(int(p.n_latent), adata.var["highly_variable"].sum() - 1, adata.n_obs - 1)
+)
 n_pcs = max(n_pcs, 2)
 sc.pp.pca(adata, n_comps=n_pcs, use_highly_variable=True, random_state=int(p.seed))
 
@@ -64,21 +74,35 @@ if method in ("scvi", "scanvi") and gpu:
     model = scvi.model.SCVI(sub, n_latent=int(p.n_latent))
     model.train()
     if method == "scanvi" and "cell_type" in adata.obs:
-        model = scvi.model.SCANVI.from_scvi_model(model, unlabeled_category="Unknown",
-                                                  labels_key="cell_type")
+        model = scvi.model.SCANVI.from_scvi_model(
+            model, unlabeled_category="Unknown", labels_key="cell_type"
+        )
         model.train()
     adata.obsm[emb] = model.get_latent_representation()
     log.info(f"{method} latent: {adata.obsm[emb].shape}")
 else:
     if method in ("scvi", "scanvi"):
-        log.warning(f"{method} requested but gpu.enabled is false -> using Harmony (CPU).")
-    sc.external.pp.harmony_integrate(adata, key=batch_key, basis="X_pca",
-                                     adjusted_basis="X_pca_harmony", random_state=int(p.seed))
+        log.warning(
+            f"{method} requested but gpu.enabled is false -> using Harmony (CPU)."
+        )
+    sc.external.pp.harmony_integrate(
+        adata,
+        key=batch_key,
+        basis="X_pca",
+        adjusted_basis="X_pca_harmony",
+        random_state=int(p.seed),
+    )
     adata.obsm[emb] = adata.obsm["X_pca_harmony"]
     method = "harmony"
 
-adata.uns["integration"] = {"method": method, "batch_key": batch_key, "n_hvg": int(n_hvg)}
-sc.pp.neighbors(adata, use_rep=emb, n_neighbors=int(p.n_neighbors), random_state=int(p.seed))
+adata.uns["integration"] = {
+    "method": method,
+    "batch_key": batch_key,
+    "n_hvg": int(n_hvg),
+}
+sc.pp.neighbors(
+    adata, use_rep=emb, n_neighbors=int(p.n_neighbors), random_state=int(p.seed)
+)
 sc.tl.umap(adata, random_state=int(p.seed))
 
 # overview UMAP: batch vs condition (visual check that batches mix but condition persists)

@@ -63,22 +63,35 @@ def main():
             if "homo sapiens" not in organism and "human" not in organism:
                 continue  # human only (drops mouse samples in GSE136103)
             title = " ".join(md.get("title", []))
-            text = " ".join(md.get("title", []) + md.get("characteristics_ch1", []) + md.get("source_name_ch1", []))
+            text = " ".join(
+                md.get("title", [])
+                + md.get("characteristics_ch1", [])
+                + md.get("source_name_ch1", [])
+            )
             axis = infer_axis(text, mapping)
             if axis is None:
                 continue  # skip samples we cannot stage (review separately)
-            cond = "cirrhotic" if axis >= 4 else ("healthy" if axis == 0 else "fibrotic")
+            cond = (
+                "cirrhotic" if axis >= 4 else ("healthy" if axis == 0 else "fibrotic")
+            )
             # donor = the PATIENT, not the GSM: collapse sort-gate / replicate suffixes
             # (e.g. "Healthy1_Cd45+", "Healthy1_Cd45-A" -> donor "Healthy1") so pseudobulk
             # DE uses one replicate per patient (avoids pseudoreplication).
             m = re.match(r"\s*([A-Za-z]+[ _]?\d+)", title)
             donor = m.group(1).replace(" ", "").replace("_", "") if m else gsm_name
-            rows.append(dict(
-                sample_id=gsm_name, dataset=ds, condition=cond,
-                fibrosis_stage_raw=text[:80].replace("\t", " "), fibrosis_axis=axis,
-                sort_gate=infer_gate(text), modality=dcfg["modality"],
-                donor_id=donor, data_path=f"results/00_download/{ds}/raw/{gsm_name}",
-            ))
+            rows.append(
+                dict(
+                    sample_id=gsm_name,
+                    dataset=ds,
+                    condition=cond,
+                    fibrosis_stage_raw=text[:80].replace("\t", " "),
+                    fibrosis_axis=axis,
+                    sort_gate=infer_gate(text),
+                    modality=dcfg["modality"],
+                    donor_id=donor,
+                    data_path=f"results/00_download/{ds}/raw/{gsm_name}",
+                )
+            )
     df = pd.DataFrame(rows)
     df.to_csv(args.out, sep="\t", index=False)
     print(f"Wrote {len(df)} samples to {args.out}")

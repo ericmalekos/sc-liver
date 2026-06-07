@@ -17,6 +17,7 @@ Each row is independently cross-referenced against the validation dataset(s), so
 positive that the primary misses but the validation confirms (the SMOC2 pattern) is flagged
 explicitly as `rescued_by_validation` — the clearest signal of a primary-anchoring blind spot.
 """
+
 import os
 import sys
 
@@ -63,7 +64,11 @@ if not cand.empty:
     cand["selected"] = cand["selected"].astype(str).str.lower().eq("true")
 primary_de = _by_comp(list(snakemake.input.primary_de))  # noqa: F821
 primary_counts = _by_comp(list(snakemake.input.primary_counts))  # noqa: F821
-valid_de = _by_comp(list(snakemake.input.valid_de)) if "valid_de" in snakemake.input.keys() else {}  # noqa: F821
+valid_de = (
+    _by_comp(list(snakemake.input.valid_de))
+    if "valid_de" in snakemake.input.keys()
+    else {}
+)  # noqa: F821
 
 
 def _padj(row):
@@ -81,9 +86,11 @@ def classify(gene, comp, direction):
         hit = cand[(cand["gene"] == gene) & (cand["compartment"] == comp)]
         if not hit.empty:
             r = hit.iloc[0]
-            d.update(composite=r.get("composite", np.nan),
-                     primary_lfc=r.get("log2FoldChange", np.nan),
-                     primary_padj=r.get("padj", np.nan))
+            d.update(
+                composite=r.get("composite", np.nan),
+                primary_lfc=r.get("log2FoldChange", np.nan),
+                primary_padj=r.get("padj", np.nan),
+            )
             if bool(r["selected"]):
                 d["rank"] = r.get("rank", "")
                 return "selected", d
@@ -121,12 +128,20 @@ def validation_status(gene, comp, direction):
     lfc = row.get("log2FoldChange", np.nan)
     padj = _padj(row)
     if padj == padj and padj < padj_thr:
-        return ("validated" if (lfc > 0) == want_up else "validated_wrong_dir"), lfc, padj
+        return (
+            ("validated" if (lfc > 0) == want_up else "validated_wrong_dir"),
+            lfc,
+            padj,
+        )
     return "val_tested_nonsig", lfc, padj
 
 
-MISS_IN_PRIMARY = {"DE_tested_nonsignificant", "DE_padj_NA",
-                   "detected_filtered_pre_DE", "absent_primary"}
+MISS_IN_PRIMARY = {
+    "DE_tested_nonsignificant",
+    "DE_padj_NA",
+    "detected_filtered_pre_DE",
+    "absent_primary",
+}
 
 rows = []
 for _, m in panel.iterrows():
@@ -134,13 +149,23 @@ for _, m in panel.iterrows():
     status, d = classify(g, comp, direction)
     vstat, vlfc, vpadj = validation_status(g, comp, direction)
     rescued = status in MISS_IN_PRIMARY and vstat == "validated"
-    rows.append(dict(
-        gene=g, compartment=comp, expected_direction=direction, source=m.get("source", ""),
-        found_status=status, rank=d["rank"], composite=d["composite"],
-        primary_lfc=d["primary_lfc"], primary_padj=d["primary_padj"],
-        validation_status=vstat, valid_lfc=vlfc, valid_padj=vpadj,
-        rescued_by_validation=rescued,
-    ))
+    rows.append(
+        dict(
+            gene=g,
+            compartment=comp,
+            expected_direction=direction,
+            source=m.get("source", ""),
+            found_status=status,
+            rank=d["rank"],
+            composite=d["composite"],
+            primary_lfc=d["primary_lfc"],
+            primary_padj=d["primary_padj"],
+            validation_status=vstat,
+            valid_lfc=vlfc,
+            valid_padj=vpadj,
+            rescued_by_validation=rescued,
+        )
+    )
 
 res = pd.DataFrame(rows)
 ensure_parent(snakemake.output.recall)  # noqa: F821
@@ -150,33 +175,65 @@ res.to_csv(snakemake.output.recall, sep="\t", index=False)  # noqa: F821
 n = len(res)
 n_selected = int((res["found_status"] == "selected").sum())
 n_surfaced = int(res["found_status"].isin(["selected", "scored_not_selected"]).sum())
-n_sig_primary = int(res["found_status"].str.startswith("DE_significant").sum()) + n_surfaced
+n_sig_primary = (
+    int(res["found_status"].str.startswith("DE_significant").sum()) + n_surfaced
+)
 n_rescued = int(res["rescued_by_validation"].sum())
 cat_counts = res["found_status"].value_counts()
 
-summary = pd.DataFrame({
-    "metric": ["n_known_positives", "recall_selected", "recall_selected_frac",
-               "surfaced_as_candidate", "detected_significant_in_primary",
-               "rescued_by_validation_only"],
-    "value": [n, n_selected, round(n_selected / n, 3) if n else 0,
-              n_surfaced, n_sig_primary, n_rescued],
-})
+summary = pd.DataFrame(
+    {
+        "metric": [
+            "n_known_positives",
+            "recall_selected",
+            "recall_selected_frac",
+            "surfaced_as_candidate",
+            "detected_significant_in_primary",
+            "rescued_by_validation_only",
+        ],
+        "value": [
+            n,
+            n_selected,
+            round(n_selected / n, 3) if n else 0,
+            n_surfaced,
+            n_sig_primary,
+            n_rescued,
+        ],
+    }
+)
 ensure_parent(snakemake.output.summary)  # noqa: F821
 summary.to_csv(snakemake.output.summary, sep="\t", index=False)  # noqa: F821
 
 # ---- figure: outcome breakdown -----------------------------------------------
 ensure_parent(snakemake.output.fig)  # noqa: F821
-order = ["selected", "scored_not_selected", "DE_significant_off_list",
-         "DE_significant_wrong_dir", "DE_tested_nonsignificant", "DE_padj_NA",
-         "detected_filtered_pre_DE", "absent_primary"]
+order = [
+    "selected",
+    "scored_not_selected",
+    "DE_significant_off_list",
+    "DE_significant_wrong_dir",
+    "DE_tested_nonsignificant",
+    "DE_padj_NA",
+    "detected_filtered_pre_DE",
+    "absent_primary",
+]
 counts = [int(cat_counts.get(k, 0)) for k in order]
-colors = ["#1a9850", "#91cf60", "#d9ef8b", "#fee08b", "#fdae61", "#f46d43",
-          "#d73027", "#a50026"]
+colors = [
+    "#1a9850",
+    "#91cf60",
+    "#d9ef8b",
+    "#fee08b",
+    "#fdae61",
+    "#f46d43",
+    "#d73027",
+    "#a50026",
+]
 fig, ax = plt.subplots(figsize=(7.5, 4.2))
 ax.barh(order[::-1], counts[::-1], color=colors[::-1])
 ax.set_xlabel("number of known positives")
-ax.set_title(f"Known-positive recall: {n_selected}/{n} selected "
-             f"({100 * n_selected / n:.0f}%); {n_rescued} rescued by validation only")
+ax.set_title(
+    f"Known-positive recall: {n_selected}/{n} selected "
+    f"({100 * n_selected / n:.0f}%); {n_rescued} rescued by validation only"
+)
 for i, v in enumerate(counts[::-1]):
     if v:
         ax.text(v + 0.05, i, str(v), va="center", fontsize=8)
@@ -184,7 +241,9 @@ fig.tight_layout()
 fig.savefig(snakemake.output.fig, dpi=120)  # noqa: F821
 
 rescued_genes = res.loc[res["rescued_by_validation"], "gene"].tolist()
-log.info(f"known-positive recall: {n_selected}/{n} selected ({100*n_selected/n:.0f}%); "
-         f"{n_surfaced} surfaced; {n_sig_primary} significant in primary; "
-         f"{n_rescued} rescued-by-validation-only ({rescued_genes}); "
-         f"breakdown={dict(cat_counts)}")
+log.info(
+    f"known-positive recall: {n_selected}/{n} selected ({100*n_selected/n:.0f}%); "
+    f"{n_surfaced} surfaced; {n_sig_primary} significant in primary; "
+    f"{n_rescued} rescued-by-validation-only ({rescued_genes}); "
+    f"breakdown={dict(cat_counts)}"
+)

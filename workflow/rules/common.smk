@@ -12,9 +12,9 @@ min_version("7.0")
 validate(config, "../../config/schemas/config.schema.yaml")
 
 # ---- samplesheet -------------------------------------------------------------
-SAMPLES = pd.read_csv(
-    config["samples_tsv"], sep="\t", comment="#", dtype=str
-).dropna(how="all")
+SAMPLES = pd.read_csv(config["samples_tsv"], sep="\t", comment="#", dtype=str).dropna(
+    how="all"
+)
 # tolerate an (almost) empty real samplesheet before make_samplesheet.py is run
 if not SAMPLES.empty:
     SAMPLES["fibrosis_axis"] = SAMPLES["fibrosis_axis"].astype(int)
@@ -97,7 +97,7 @@ def ambient_script():
     if m == "decontx":
         return script_py("qc_ambient_decontx.py")  # light Python<->R hand-off (no basilisk)
     if m == "soupx":
-        return script_r("qc_ambient.R")            # needs raw droplets; not for filtered GEO data
+        return script_r("qc_ambient.R")  # needs raw droplets; not for filtered GEO data
     return script_py("qc_ambient.py")
 
 

@@ -4,6 +4,7 @@ Per required compartment, trains a fibrotic-vs-healthy classifier on DONOR-level
 (no cell leakage) with DONOR-GROUPED cross-validation, then extracts SHAP feature importances
 to rank genes by their contribution. Robust to tiny/degenerate compartments (importance 0).
 """
+
 import json
 import os
 import pickle
@@ -36,8 +37,14 @@ def make_model():
         return RandomForestClassifier(n_estimators=300, random_state=int(p.seed))
     from xgboost import XGBClassifier
 
-    return XGBClassifier(n_estimators=200, max_depth=3, learning_rate=0.1,
-                         subsample=0.8, eval_metric="logloss", random_state=int(p.seed))
+    return XGBClassifier(
+        n_estimators=200,
+        max_depth=3,
+        learning_rate=0.1,
+        subsample=0.8,
+        eval_metric="logloss",
+        random_state=int(p.seed),
+    )
 
 
 rows, metrics, models = [], {}, {}
@@ -51,7 +58,10 @@ for comp, cfile in by_comp.items():
     mask = y.notna()
     counts, y, coldata = counts.loc[:, mask.values], y[mask], coldata[mask.values]
     if y.nunique() < 2 or y.value_counts().min() < 2:
-        metrics[comp] = {"status": "skipped_one_class", "n_donors": int(counts.shape[1])}
+        metrics[comp] = {
+            "status": "skipped_one_class",
+            "n_donors": int(counts.shape[1]),
+        }
         continue
 
     # candidate genes for this compartment (fallback to all)
@@ -62,12 +72,16 @@ for comp, cfile in by_comp.items():
     X, yv = cpm.values, y.values
     groups = coldata["donor_id"].values if "donor_id" in coldata else np.arange(len(yv))
 
-    n_splits = int(min(int(p.cv_folds), len(np.unique(groups)), pd.Series(yv).value_counts().min()))
+    n_splits = int(
+        min(int(p.cv_folds), len(np.unique(groups)), pd.Series(yv).value_counts().min())
+    )
     cv_score = np.nan
     try:
         if n_splits >= 2:
             cv = GroupKFold(n_splits=n_splits)
-            cv_score = float(np.mean(cross_val_score(make_model(), X, yv, groups=groups, cv=cv)))
+            cv_score = float(
+                np.mean(cross_val_score(make_model(), X, yv, groups=groups, cv=cv))
+            )
     except Exception as e:
         log.warning(f"[{comp}] CV failed: {e}")
 
@@ -88,13 +102,25 @@ for comp, cfile in by_comp.items():
     rng = imp.max() - imp.min()
     norm = (imp - imp.min()) / rng if rng > 0 else np.zeros_like(imp)
     for g, s in zip(genes, norm):
-        rows.append({"gene": g, "compartment": comp, "shap_importance": float(s),
-                     "cv_score": cv_score})
-    metrics[comp] = {"status": "ok", "n_donors": int(len(yv)), "n_features": len(genes),
-                     "cv_accuracy": cv_score}
+        rows.append(
+            {
+                "gene": g,
+                "compartment": comp,
+                "shap_importance": float(s),
+                "cv_score": cv_score,
+            }
+        )
+    metrics[comp] = {
+        "status": "ok",
+        "n_donors": int(len(yv)),
+        "n_features": len(genes),
+        "cv_accuracy": cv_score,
+    }
     log.info(f"[{comp}] trained on {len(yv)} donors, {len(genes)} genes, cv={cv_score}")
 
-shap_df = pd.DataFrame(rows, columns=["gene", "compartment", "shap_importance", "cv_score"])
+shap_df = pd.DataFrame(
+    rows, columns=["gene", "compartment", "shap_importance", "cv_score"]
+)
 ensure_parent(snakemake.output.shap)  # noqa: F821
 shap_df.to_csv(snakemake.output.shap, sep="\t", index=False)  # noqa: F821
 with open(snakemake.output.model, "wb") as fh:  # noqa: F821

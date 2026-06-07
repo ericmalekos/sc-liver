@@ -5,6 +5,7 @@ F2+ vs low, snRNA) donor-aware DE by DIRECTION/RANK rather than raw expression, 
 robust to the scRNA/snRNA modality gap. Emits a per-(gene, compartment) reproducibility
 score consumed by the biomarker scoring.
 """
+
 import os
 import sys
 
@@ -35,7 +36,11 @@ def parse(files):
 
 
 prim = parse(list(snakemake.input.primary))  # noqa: F821
-vald = parse(list(snakemake.input.validation)) if "validation" in snakemake.input.keys() else {}  # noqa: F821
+vald = (
+    parse(list(snakemake.input.validation))
+    if "validation" in snakemake.input.keys()
+    else {}
+)  # noqa: F821
 
 rows, summary = [], []
 for comp, pdf in prim.items():
@@ -46,8 +51,12 @@ for comp, pdf in prim.items():
         shared = pdf.index.intersection(vdf.index)
         rho = np.nan
         if len(shared) >= 5:
-            rho, _ = spearmanr(pdf.loc[shared, "stat"], vdf.loc[shared, "stat"], nan_policy="omit")
-        summary.append({"compartment": comp, "n_shared": len(shared), "spearman_stat": rho})
+            rho, _ = spearmanr(
+                pdf.loc[shared, "stat"], vdf.loc[shared, "stat"], nan_policy="omit"
+            )
+        summary.append(
+            {"compartment": comp, "n_shared": len(shared), "spearman_stat": rho}
+        )
     else:
         shared = pdf.index[:0]
         summary.append({"compartment": comp, "n_shared": 0, "spearman_stat": np.nan})
@@ -67,9 +76,19 @@ for comp, pdf in prim.items():
             score = 0.60
         else:
             score = 0.00
-        rows.append(dict(gene=g, compartment=comp, primary_lfc=plfc, primary_padj=ppadj,
-                         valid_lfc=vlfc, valid_padj=vpadj, in_validation=in_val,
-                         sign_concordant=concord, repro_score=score))
+        rows.append(
+            dict(
+                gene=g,
+                compartment=comp,
+                primary_lfc=plfc,
+                primary_padj=ppadj,
+                valid_lfc=vlfc,
+                valid_padj=vpadj,
+                in_validation=in_val,
+                sign_concordant=concord,
+                repro_score=score,
+            )
+        )
 
 out_df = pd.DataFrame(rows)
 ensure_parent(snakemake.output.repro)  # noqa: F821
@@ -97,5 +116,7 @@ except Exception as e:
     plt.text(0.5, 0.5, "figure unavailable", ha="center")
     plt.savefig(snakemake.output.fig, dpi=90)  # noqa: F821
 
-log.info(f"repro: {len(out_df)} gene-compartment rows; "
-         f"summary={pd.DataFrame(summary).to_dict('records')}")
+log.info(
+    f"repro: {len(out_df)} gene-compartment rows; "
+    f"summary={pd.DataFrame(summary).to_dict('records')}"
+)

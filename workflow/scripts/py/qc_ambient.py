@@ -4,6 +4,7 @@ decontX / SoupX are handled by the R sibling (qc_ambient.R); they work on the FI
 matrices GEO ships. CellBender needs raw (unfiltered) droplets and a GPU to be practical;
 when those aren't available it logs and passes through so the pipeline still completes.
 """
+
 import os
 import sys
 

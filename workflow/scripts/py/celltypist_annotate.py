@@ -8,14 +8,13 @@
   activated-HSC), AND the stromal discriminators (HSC vs portal-fibroblast vs myofibroblast
   vs VSMC) — the explicit answer to the Q4 disambiguation.
 """
+
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _utils import ensure_parent, get_logger, use_agg, write_h5ad  # noqa: E402
 
-import numpy as np  # noqa: E402
-import pandas as pd  # noqa: E402
 import scanpy as sc  # noqa: E402
 import yaml  # noqa: E402
 
@@ -77,7 +76,9 @@ val.insert(1, "cell_type", g["cell_type"].agg(lambda s: s.mode().iat[0]))
 val.insert(2, "compartment", g["compartment"].agg(lambda s: s.mode().iat[0]))
 # fibrosis enrichment per cluster (fraction from high-fibrosis samples), supports Q4
 if "fibrosis_axis" in adata.obs:
-    val["frac_fibrotic_F3plus"] = g["fibrosis_axis"].agg(lambda s: float((s.astype(int) >= 3).mean()))
+    val["frac_fibrotic_F3plus"] = g["fibrosis_axis"].agg(
+        lambda s: float((s.astype(int) >= 3).mean())
+    )
 val = val.round(3)
 ensure_parent(snakemake.output.validation)  # noqa: F821
 val.to_csv(snakemake.output.validation, sep="\t")  # noqa: F821
@@ -93,4 +94,6 @@ fig.savefig(snakemake.output.umap, dpi=110, bbox_inches="tight")  # noqa: F821
 plt.close("all")
 
 write_h5ad(adata, snakemake.output.h5ad)  # noqa: F821
-log.info(f"Annotated {adata.n_obs} cells; validation table -> {snakemake.output.validation}")  # noqa: F821
+log.info(
+    f"Annotated {adata.n_obs} cells; validation table -> {snakemake.output.validation}"
+)  # noqa: F821
