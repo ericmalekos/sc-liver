@@ -94,8 +94,10 @@ diagnostic / target for the macrophage niche), and the **secreted collagen / pro
 (COL3A1, LUM, DCN) as circulating-biomarker candidates.
 
 **Calibration.** Against a 37-gene panel of established human-liver-fibrosis markers, the pipeline
-recovers 10 as headline candidates and surfaces 25 as scored candidates, so the list's sensitivity
-is moderate and the gaps are cohort-driven (small-n dilution of subset markers) rather than scoring
+surfaces 25 as scored candidates and selects 8 as headline picks. Most remaining gaps are
+cohort-driven (small-n dilution of subset markers in the primary cohort); the few strongly
+significant collagens not in the headline (COL1A1, COL1A2) are scored just below the
+per-compartment cap rather than missed, so sensitivity is moderate and the gaps are not scoring
 artifacts.
 
 **Limitations.** The primary cohort is small (5 cirrhotic vs 5 healthy donors; 3 vs 3 for the

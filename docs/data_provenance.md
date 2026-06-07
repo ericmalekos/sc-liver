@@ -67,3 +67,23 @@ Cross-dataset comparison (`workflow/scripts/py/crossdataset_repro.py`) is done a
 **direction/rank** (sign-concordance, Spearman of the Wald statistic), which is robust to absolute
 expression differences between scRNA and snRNA and between etiologies; reproducibility is one
 **weighted component** of the biomarker score, not a hard filter.
+
+## Annotation resource snapshots (offline, deterministic)
+The biomarker score (`workflow/scripts/py/build_features.py`) annotates each gene against dated
+reference snapshots committed under `resources/`, so a clean checkout scores identically with no
+network access. Each was downloaded once (2026-06-07) and frozen:
+
+| Snapshot | Source | Genes | Used for |
+|---|---|---|---|
+| `secretome_hpa_2019.csv` | Human Protein Atlas, **Predicted secreted proteins** protein class (Uhlen et al. 2019, *Sci. Signal.*, "The human secretome") | 1,902 | accessibility = `secreted` |
+| `surfaceome_surfy_2018.csv` | **SURFY** in-silico human surfaceome (Bausch-Fluck et al. 2018, *PNAS*), sheet "in silico surfaceome only" | 2,799 | accessibility = `surface` |
+| `druggability_snapshot.tsv` | Open Targets tractability + DGIdb (cached) | (panel) | druggability component |
+
+**Accessibility precedence is surface > secreted > unknown.** A gene in the surfaceome is called
+`surface` even if it is also in the secretome, because a membrane protein that is also predicted-
+secreted is a **shed receptor** (e.g. soluble TREM2) whose structural localization is the cell
+surface. A gene in neither reference is labeled **`unknown`**, not `intracellular`: absence from
+these (non-exhaustive) sets is not positive evidence of intracellular localization, so the pipeline
+does not assert a localization it has not verified. This replaced an earlier pair of ~30-gene
+hand-curated lists whose unknown-defaults mislabeled bona fide secreted proteins (e.g. MMP7, SPP2,
+A2M) as intracellular.

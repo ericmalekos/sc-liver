@@ -114,7 +114,13 @@ if os.path.exists(cache):
 de["druggability"] = de["gene"].map(drug).fillna(0.10)
 
 
-# --- accessibility (secretome > surfaceome > intracellular) ---
+# --- accessibility (surfaceome > secretome > unknown) ---
+# Membership in authoritative reference snapshots (committed under resources/): the SURFY
+# in-silico surfaceome (Bausch-Fluck 2018) and the HPA predicted secretome (Uhlen 2019).
+# Surface is checked first: a bona fide membrane protein that is also predicted-secreted is a
+# shed receptor (e.g. TREM2), so the structural call is "surface". A gene in neither reference
+# is labeled "unknown" (not "intracellular"): absence from these sets is not evidence of
+# intracellular localization, so we do not assert a localization we have not verified.
 def load_list(path):
     return set(pd.read_csv(path)["gene"]) if path and os.path.exists(path) else set()
 
@@ -124,11 +130,11 @@ surf = load_list(p.accessibility.get("surfaceome"))
 
 
 def access(g):
-    if g in secret:
-        return ("secreted", 1.0)
     if g in surf:
         return ("surface", 0.8)
-    return ("intracellular", 0.3)
+    if g in secret:
+        return ("secreted", 1.0)
+    return ("unknown", 0.3)
 
 
 acc = de["gene"].map(access)

@@ -211,15 +211,15 @@ druggability \\
 \bottomrule\noalign{}
 \endlastfoot
 0 & 1.0 & PDGFRA & stellate\_myofibroblast & 0.671 & surface & 0.90 \\
-1 & 2.0 & ACKR1 & endothelial & 0.635 & surface & 0.30 \\
-2 & 3.0 & LUM & stellate\_myofibroblast & 0.624 & secreted & 0.10 \\
-3 & 4.0 & DCN & stellate\_myofibroblast & 0.612 & secreted & 0.10 \\
-4 & 5.0 & TREM2 & macrophage\_monocyte & 0.606 & surface & 0.60 \\
-5 & 6.0 & PLVAP & endothelial & 0.581 & surface & 0.40 \\
-7 & 7.0 & COL3A1 & stellate\_myofibroblast & 0.553 & secreted & 0.20 \\
-9 & 8.0 & MMP7 & cholangiocyte & 0.545 & intracellular & 0.10 \\
-10 & 9.0 & SPP2 & cholangiocyte & 0.544 & intracellular & 0.10 \\
-11 & 10.0 & MMP2 & stellate\_myofibroblast & 0.542 & secreted & 0.55 \\
+1 & 2.0 & MMP7 & cholangiocyte & 0.645 & secreted & 0.10 \\
+2 & 3.0 & SPP2 & cholangiocyte & 0.644 & secreted & 0.10 \\
+3 & 4.0 & ACKR1 & endothelial & 0.635 & surface & 0.30 \\
+5 & 5.0 & LUM & stellate\_myofibroblast & 0.624 & secreted & 0.10 \\
+6 & 6.0 & DCN & stellate\_myofibroblast & 0.612 & secreted & 0.10 \\
+7 & 7.0 & TREM2 & macrophage\_monocyte & 0.606 & surface & 0.60 \\
+8 & 8.0 & PLVAP & endothelial & 0.581 & surface & 0.40 \\
+11 & 9.0 & COL3A1 & stellate\_myofibroblast & 0.553 & secreted & 0.20 \\
+13 & 10.0 & MMP2 & stellate\_myofibroblast & 0.542 & secreted & 0.55 \\
 \end{longtable}
 }
 
@@ -263,10 +263,13 @@ niche), and the \textbf{secreted collagen / proteoglycan panel} (COL3A1,
 LUM, DCN) as circulating-biomarker candidates.
 
 \textbf{Calibration.} Against a 37-gene panel of established
-human-liver-fibrosis markers, the pipeline recovers 10 as headline
-candidates and surfaces 25 as scored candidates, so the list's
-sensitivity is moderate and the gaps are cohort-driven (small-n dilution
-of subset markers) rather than scoring artifacts.
+human-liver-fibrosis markers, the pipeline surfaces 25 as scored
+candidates and selects 8 as headline picks. Most remaining gaps are
+cohort-driven (small-n dilution of subset markers in the primary
+cohort); the few strongly significant collagens not in the headline
+(COL1A1, COL1A2) are scored just below the per-compartment cap rather
+than missed, so sensitivity is moderate and the gaps are not scoring
+artifacts.
 
 \textbf{Limitations.} The primary cohort is small (5 cirrhotic vs 5
 healthy donors; 3 vs 3 for the stellate and cholangiocyte compartments),

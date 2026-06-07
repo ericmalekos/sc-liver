@@ -99,7 +99,8 @@ def rationale(r):
         bits.append("reproduced in validation")
     if r["druggability"] >= 0.6:
         bits.append("druggable")
-    bits.append(r["accessibility_class"])
+    if r["accessibility_class"] in ("secreted", "surface"):
+        bits.append(r["accessibility_class"])
     if r.get("shap_importance", 0) >= 0.5:
         bits.append("high ML importance")
     return "; ".join(bits)

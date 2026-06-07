@@ -82,7 +82,7 @@ score:
   specificity_index: tau
   druggability_sources: [open_targets, dgidb]
   druggability_cache: resources/druggability_snapshot.tsv
-  accessibility: {surfaceome: resources/surfaceome.csv, secretome: resources/secretome.csv}
+  accessibility: {surfaceome: resources/surfaceome_surfy_2018.csv, secretome: resources/secretome_hpa_2019.csv}
   top_n_per_compartment: 3
   top_n_overall: 10
   tie_breaker: [reproducibility, de]

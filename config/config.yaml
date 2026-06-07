@@ -164,8 +164,8 @@ score:
   druggability_sources: [open_targets, dgidb]
   druggability_cache: resources/druggability_snapshot.tsv   # dated offline snapshot
   accessibility:
-    surfaceome: resources/surfaceome.csv
-    secretome: resources/secretome.csv
+    surfaceome: resources/surfaceome_surfy_2018.csv   # SURFY in-silico surfaceome (Bausch-Fluck 2018 PNAS)
+    secretome: resources/secretome_hpa_2019.csv       # HPA predicted secreted proteins (Uhlen 2019, Sci Signal)
   top_n_per_compartment: 5
   top_n_overall: 20
   tie_breaker: [reproducibility, de]

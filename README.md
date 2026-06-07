@@ -104,7 +104,7 @@ min-max-normalized components (weights in `config.yaml`):
 | cell-type specificity | 0.20 | tau, expressed in *this* compartment, not everywhere |
 | cross-dataset reproducibility | 0.20 | same DE direction in the validation cohort |
 | druggability | 0.15 | Open Targets tractability + DGIdb |
-| accessibility | 0.10 | secreted > cell-surface > intracellular |
+| accessibility | 0.10 | secreted > cell-surface > unknown (SURFY surfaceome / HPA secretome) |
 | ML / SHAP | 0.10 | XGBoost donor-grouped importance *(currently ~null, see Limitations)* |
 
 Before ranking, a candidate must clear two **gates**: it must be **DE-significant** (compartment

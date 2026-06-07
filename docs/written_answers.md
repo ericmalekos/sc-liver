@@ -217,7 +217,10 @@ decisions.
    robust to the sc/sn modality gap;
 4. **Druggability/tractability** — Open Targets tractability + DGIdb interactions;
 5. **Biomarker accessibility** — secreted (best for circulating diagnostics) > cell-surface
-   (targetable) > intracellular, via surfaceome/secretome membership;
+   (targetable) > unknown, by membership in dated authoritative reference snapshots (the SURFY
+   in-silico surfaceome, Bausch-Fluck 2018; the HPA predicted secretome, Uhlen 2019). Surface
+   takes precedence over secreted for shed receptors (e.g. soluble TREM2), and a gene in neither
+   set is labeled *unknown* rather than asserting an unverified intracellular localization;
 6. **An explainable ML signal** — an **XGBoost** (or random-forest) classifier of fibrotic-vs-
    healthy trained on **donor-level pseudobulk with donor-grouped cross-validation** (no cell or
    donor leakage), with **SHAP** values giving per-gene importance.
@@ -242,8 +245,11 @@ which removes ambient/cross-compartment leakage (e.g. SPP1 surfacing in lymphoid
 normalized composite, DE + specificity gates, niche fold-in, per-candidate rationale) produce
 `results/08_score/candidate_scores.tsv`. A **known-positive recall** check
 (`known_positive_recall.py`, panel in `resources/known_positive_markers.tsv`) reports how many
-literature markers the ranked list recovers and *why* any are missed — currently **10/37
-selected**, the remaining gap being small-n dilution rather than a scoring defect.
+literature markers the ranked list recovers and *why* any are missed — currently **8/37
+selected** as headline picks (**25/37 scored**). Most of the remaining gap is small-n dilution
+(markers driven non-significant in the small primary cohort) rather than a scoring defect; a few
+strongly significant collagens (COL1A1, COL1A2) are scored but fall just below the per-compartment
+cap.
 
 ---
 
