@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: "3.11"}
-      - run: pip install snakefmt==0.10.2 black==24.4.2 ruff==0.4.8 yamllint==1.35.1 snakemake-minimal==7.28.3 jsonschema pyyaml
+      - run: pip install snakefmt==0.10.2 black==24.4.2 ruff==0.4.8 yamllint==1.35.1 jsonschema pyyaml
       - run: snakefmt --check workflow/
       - run: black --check workflow/scripts/py
       - run: ruff check workflow/scripts/py
