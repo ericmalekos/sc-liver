@@ -4,20 +4,20 @@ A reproducible, modular **Snakemake + Scanpy** pipeline that discovers and prior
 **cell-type-specific biomarkers and therapeutic targets** in human liver fibrosis from
 single-cell / single-nucleus RNA-seq.
 
-- **Primary dataset:** [GSE136103](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE136103)
-  — Ramachandran et al. 2019, *Nature*, "Resolving the fibrotic niche of human liver cirrhosis
+- **Primary dataset:** [GSE136103](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE136103),
+  Ramachandran et al. 2019, *Nature*, "Resolving the fibrotic niche of human liver cirrhosis
   using single-cell transcriptomics."
-- **Validation dataset:** [GSE244832](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE244832)
-  — human MASLD/MASH liver snRNA-seq + snATAC (graded F0→F4). See
+- **Validation dataset:** [GSE244832](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE244832),
+  human MASLD/MASH liver snRNA-seq + snATAC (graded F0→F4). See
   [`docs/data_provenance.md`](docs/data_provenance.md) for why this set (and not GSE207310 / SCP2154).
 - **Required compartments:** hepatic stellate / mesenchymal / myofibroblast · macrophage / monocyte ·
   endothelial.
 
 The pipeline goes **ingest → QC → integrate → annotate → donor-aware DE → pathway/mechanism →
-cell-cell communication → AI/ML biomarker prioritization → ranked 10–20 candidates → report**.
+cell-cell communication → AI/ML biomarker prioritization → ranked 10 to 20 candidates → report**.
 
 > Written answers to the 8 single-cell analysis design questions are in
-> [`docs/written_answers.md`](docs/written_answers.md); the 1–2 page executive summary is
+> [`docs/written_answers.md`](docs/written_answers.md); the 1 to 2 page executive summary is
 > rendered to `results/10_report/exec_summary.pdf`.
 
 ---
@@ -35,20 +35,20 @@ pipeline regenerates all figures under `results/*/figures/` for both cohorts.
 GEO `GSE136103_RAW.tar` → per-sample 10x matrices; heterogeneous fibrosis labels are mapped to a
 common **`fibrosis_axis`** (`make_samplesheet.py`, `harmonize_metadata.py`).
 
-> **`fibrosis_axis`** — a harmonized **ordinal fibrosis-severity scale, 0 = healthy/normal → 4 =
-> cirrhosis/F4**, onto which each cohort's native labels are mapped (METAVIR F0–F4, NASH/MASH
+> **`fibrosis_axis`** is a harmonized **ordinal fibrosis-severity scale, 0 = healthy/normal → 4 =
+> cirrhosis/F4**, onto which each cohort's native labels are mapped (METAVIR F0 to F4, NASH/MASH
 > grades, cirrhosis/non-cirrhosis). A binary **F2+** contrast (axis ≥ 2 = significant fibrosis) is
 > derived for cross-cohort comparison. GSE136103's public metadata is only healthy/cirrhotic, so
 > its axis is effectively binary (0 or 4); the graded gradient comes from the validation cohort.
 
 ### 2 · Quality control
 Adaptive MAD filtering, liver/modality-aware mitochondrial ceiling, decontX ambient removal (with
-cluster priors), Scrublet doublets — stressed/diseased cells deliberately retained *(one example
+cluster priors), Scrublet doublets; stressed/diseased cells deliberately retained *(one example
 sample shown)*.
 
 ![QC example](docs/figures/02_qc_example.png)
 
-### 3 · Integration — batch-correct over donor, never disease
+### 3 · Integration: batch-correct over donor, never disease
 Harmony over `sample_id`; scIB metrics plus a fibrosis-signal guard that fails the run if the
 disease axis collapses. Batches mix while condition is preserved.
 
@@ -67,35 +67,35 @@ Donor-level pseudobulk DESeq2 (replication unit = donor) per compartment, plus a
 **niche** stage that recovers disease-subset biomarkers (PLVAP, TREM2) the compartment test
 buries → `results/05_de/`. *(stellate / myofibroblast, cirrhotic vs healthy, shown)*
 
-![DE volcano — stellate](docs/figures/05_de_volcano.png)
+![DE volcano, stellate](docs/figures/05_de_volcano.png)
 
-### 6 · Mechanism — pathway / TF activity & cell–cell communication
-decoupler (PROGENy pathways, CollecTRI TFs) + GSEA; LIANA consensus ligand–receptor with
+### 6 · Mechanism: pathway / TF activity & cell-cell communication
+decoupler (PROGENy pathways, CollecTRI TFs) + GSEA; LIANA consensus ligand-receptor with
 downstream-target corroboration.
 
 ![Pathway / TF activity](docs/figures/06_pathway_activity.png)
 
 ### 7 · Cross-dataset reproducibility
 DE direction/rank concordance between primary and validation cohorts *(honest caveat: weak in
-this cohort pair — see the Limitations section of [`docs/written_answers.md`](docs/written_answers.md))*.
+this cohort pair; see the Limitations section of [`docs/written_answers.md`](docs/written_answers.md))*.
 
 ![Cross-dataset concordance](docs/figures/07_crossdataset_concordance.png)
 
 ### 8 · Biomarker prioritization & known-positive recall
-Each **(gene, compartment)** is scored by a transparent **composite** — a weighted sum of six
-min–max-normalized components (weights in `config.yaml`):
+Each **(gene, compartment)** is scored by a transparent **composite**: a weighted sum of six
+min-max-normalized components (weights in `config.yaml`):
 
 | Component | weight | rewards |
 |---|---|---|
 | DE effect | 0.25 | effect size × significance (compartment DE **or** disease-niche marker) |
-| cell-type specificity | 0.20 | tau — expressed in *this* compartment, not everywhere |
+| cell-type specificity | 0.20 | tau, expressed in *this* compartment, not everywhere |
 | cross-dataset reproducibility | 0.20 | same DE direction in the validation cohort |
 | druggability | 0.15 | Open Targets tractability + DGIdb |
 | accessibility | 0.10 | secreted > cell-surface > intracellular |
-| ML / SHAP | 0.10 | XGBoost donor-grouped importance *(currently ~null — see Limitations)* |
+| ML / SHAP | 0.10 | XGBoost donor-grouped importance *(currently ~null, see Limitations)* |
 
 Before ranking, a candidate must clear two **gates**: it must be **DE-significant** (compartment
-or disease-niche) **and** pass a **specificity floor** — so abundant lineage markers and ambient
+or disease-niche) **and** pass a **specificity floor**, so abundant lineage markers and ambient
 cross-compartment leakage cannot be ranked. Selection takes the top-N per required compartment,
 then fills to the overall top-20. In the chart below, **bars are colored by compartment** (see
 legend); the **known-positive recall** panel separately reports how many literature markers the
@@ -155,7 +155,7 @@ which is kept as a fallback for systems without micromamba). On this cluster the
 
 ---
 
-## Quickstart — run the whole pipeline on the bundled test fixture (minutes, no cluster)
+## Quickstart: run the whole pipeline on the bundled test fixture (minutes, no cluster)
 
 ```bash
 # dry-run: confirm the full DAG resolves for both dataset arms
@@ -192,7 +192,7 @@ deliverables. Memory/time scale per-rule with retries; see `profiles/slurm/clust
 | Differential expression results | `results/05_de/<ds>/<compartment>/` |
 | Pathway / mechanism results | `results/06_pathway/<ds>/` |
 | Cell-cell communication results | `results/07_ccc/<ds>/` |
-| **Ranked 10–20 biomarker/target table** | `results/08_score/candidate_scores.tsv` |
+| **Ranked 10 to 20 biomarker/target table** | `results/08_score/candidate_scores.tsv` |
 | Cross-dataset reproducibility | `results/09_crossdataset/repro_scores.tsv` |
 | **Report (HTML + PDF) + executive summary** | `results/10_report/` |
 | Provenance (resolved config, env lock, git SHA, DAG) | `results/provenance/` |
