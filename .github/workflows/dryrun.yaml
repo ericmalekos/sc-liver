@@ -1,0 +1,14 @@
+name: dry-run
+on: [push, pull_request]
+
+jobs:
+  dryrun:
+    name: DAG dry-run (validate the workflow on the test config)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - run: pip install snakemake==7.28.3 pandas pyyaml jsonschema pulp==2.7.0
+      - run: snakemake -n -p --configfile config/config.test.yaml
+      - run: snakemake --lint --configfile config/config.test.yaml || true
